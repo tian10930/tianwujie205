@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS对象的应用</title>
+</head>
+<body>
+    <!--个人明信片的案例：明信片中包含属性和方法，贴近大学生生活-->
+    <script>
+        var studentCard = {
+            name: "张三",
+            age: 20,
+            sex: "男",
+            height: 180,
+            weight: 70,
+            grade: "大三",
+            hobby: ["唱歌", "跳舞", "打篮球"],
+            introduce: function() {
+                //反引号`可以嵌入表达式，this指向当前对象$()就是要嵌入的变量
+                return`我的姓名是：${this.name}, 年龄：${this.age}, 性别：${this.sex}, 身高：${this.height}cm, 体重：${this.weight}kg, 爱好：${this.hobby}`;
+            },
+            upgrade: function() {
+               const grades=["大一","大二","大三","大四"];
+               console.log("index="+index);
+               var index=grades.indexOf(this.grade);
+            //let是块级作用域，i只在当前块级作用域有效
+            //var的作用域如果是定义在最前面是全局变量，如果定义在函数中就是函数作用域，函数外部无法访问
+            
+                if(index<grades.length-1){
+                   this.grade=grades[index+1];
+                }
+                else{
+                    this.grade="毕业"; 
+               }
+            
+            return this.grade;
+            }
+        }
+        document.write('<div>我的自我介绍是' + studentCard.introduce() + '</div>');
+        document.write('<div>升级后年级为：' + studentCard.upgrade() + '</div>');
+
+    </script>
+    
+</body>
+</html>

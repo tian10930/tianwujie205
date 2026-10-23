@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>线之掌 | TWJ 形库</title>
+<meta name="description" content="TWJ 形库第四章：移动端固定底栏样本，图标以 iconfont SVG symbol 方式渲染，含数字徽章与红点。">
+<style>
+:root{
+  --twj-paper:#F1F2EF;
+  --twj-inkc:#1A1D23;
+  --twj-ikb:#002FA7;
+  --twj-lead:#6E747E;
+  --twj-body2:#3A3E46;
+  --twj-linec:#D9DBD3;
+  --twj-red:#E5484D;
+  --twj-display:"Kaiti SC","STKaiti",KaiTi,"Noto Serif SC",SimSun,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--twj-paper);color:var(--twj-inkc);font-family:"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--twj-ikb);outline-offset:2px}
+
+.twj_top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:18px 42px;border-bottom:1px solid var(--twj-linec)}
+.twj_brand{font-family:var(--twj-display);font-size:1.3rem;font-weight:700;color:var(--twj-inkc);text-decoration:none;letter-spacing:.14em}
+.twj_brand:hover{color:var(--twj-ikb)}
+.twj_nav{display:flex;flex-wrap:wrap;gap:24px}
+.twj_navLink{color:var(--twj-lead);text-decoration:none;font-size:.88rem;letter-spacing:.06em;transition:color .25s}
+.twj_navLink:hover{color:var(--twj-inkc)}
+.twj_navLink[aria-current="page"]{color:var(--twj-inkc);border-bottom:2px solid var(--twj-ikb);padding-bottom:2px}
+
+.twj_stage{padding:5vh 24px 7vh;display:flex;flex-direction:column;align-items:center;gap:16px}
+.twj_phone{width:min(390px,100%);height:780px;border-radius:42px;border:1px solid var(--twj-linec);box-shadow:0 34px 90px rgba(26,29,35,.16);position:relative;overflow:hidden;background:var(--twj-paper)}
+.twj_phone::before{content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);width:96px;height:5px;border-radius:3px;background:var(--twj-linec);z-index:3}
+.twj_screen{position:absolute;inset:0;overflow-y:auto;padding:34px 20px 118px;scrollbar-width:thin}
+.twj_caption{font-size:12px;color:var(--twj-lead);letter-spacing:.08em;margin:0}
+
+.twj_appHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 18px}
+.twj_appBrand{font-size:11px;color:var(--twj-lead);letter-spacing:.32em;margin:0}
+.twj_appTitle{font-family:var(--twj-display);font-size:1.8rem;font-weight:700;letter-spacing:.1em;margin:0;color:var(--twj-inkc)}
+
+.twj_panel{display:flex;flex-direction:column;gap:14px}
+.twj_greet{font-family:var(--twj-display);font-size:1.28rem;letter-spacing:.06em;margin:2px 2px 0;color:var(--twj-body2)}
+.twj_greet strong{color:var(--twj-ikb);font-weight:700}
+.twj_list{display:flex;flex-direction:column;gap:10px}
+.twj_card{background:#FFFFFF;border:1px solid var(--twj-linec);border-radius:16px;padding:14px 16px}
+.twj_row{display:flex;align-items:center;gap:12px}
+.twj_svgIcon{fill:currentColor;flex-shrink:0}
+.twj_rowGlyph{width:19px;height:19px;color:var(--twj-ikb)}
+.twj_rowMain{min-width:0}
+.twj_rowTitle{font-size:14px;color:var(--twj-inkc);letter-spacing:.03em}
+.twj_rowSub{font-size:11.5px;color:var(--twj-lead);margin-top:1px}
+.twj_tag{margin-left:auto;flex-shrink:0;font-size:11px;letter-spacing:.06em;padding:2px 9px;border-radius:999px;color:var(--twj-ikb);border:1px solid var(--twj-linec)}
+.twj_actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.twj_action{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 6px 13px;background:#FFFFFF;border:1px solid var(--twj-linec);border-radius:16px;color:var(--twj-body2);cursor:pointer;transition:border-color .25s,color .25s,transform .15s}
+.twj_action:hover{border-color:var(--twj-ikb);color:var(--twj-ikb)}
+.twj_action:active{transform:scale(.96)}
+.twj_actionGlyph{width:22px;height:22px;color:var(--twj-ikb)}
+.twj_actionText{font-size:11.5px;letter-spacing:.04em}
+.twj_search{display:flex;align-items:center;gap:10px;background:#FFFFFF;border:1px solid var(--twj-linec);border-radius:999px;padding:11px 16px}
+.twj_searchGlyph{width:17px;height:17px;color:var(--twj-lead)}
+.twj_searchInput{flex:1;min-width:0;background:none;border:none;color:var(--twj-inkc);font-size:14px;outline:none}
+.twj_searchInput::placeholder{color:var(--twj-lead)}
+.twj_chips{display:flex;flex-wrap:wrap;gap:8px}
+.twj_chip{padding:6px 14px;border-radius:999px;border:1px solid var(--twj-linec);font-size:12.5px;color:var(--twj-lead);letter-spacing:.04em}
+.twj_sectionLabel{font-size:12px;color:var(--twj-lead);letter-spacing:.22em;margin:6px 2px 0}
+
+.twj_tabbar{position:absolute;bottom:0;left:0;width:100%;display:flex;background:#FFFFFF;border-top:1px solid var(--twj-linec);padding-bottom:env(safe-area-inset-bottom);animation:twj_barUp .7s cubic-bezier(.2,.8,.25,1) .1s both;z-index:2}
+@keyframes twj_barUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.twj_tab{flex:1;background:none;border:none;padding:11px 0 12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--twj-lead);cursor:pointer;position:relative;transition:color .25s}
+.twj_tab:active{transform:scale(.94)}
+.twj_tabOn{color:var(--twj-ikb)}
+.twj_tabOn::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:2px;background:var(--twj-ikb)}
+.twj_tabIcon{position:relative;display:block;line-height:1}
+.twj_tabGlyph{width:23px;height:23px}
+.twj_tabText{font-size:11.5px;letter-spacing:.08em}
+.twj_badge{position:absolute;top:-8px;right:-13px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--twj-red);color:#fff;font-size:10.5px;line-height:17px;text-align:center;font-variant-numeric:tabular-nums;box-shadow:0 0 0 2px #FFFFFF;transition:opacity .25s,transform .25s}
+.twj_dot{position:absolute;top:-3px;right:-8px;width:8px;height:8px;border-radius:50%;background:var(--twj-red);box-shadow:0 0 0 2px #FFFFFF}
+.twj_badgeOff{opacity:0;transform:scale(.4);pointer-events:none}
+
+.twj_foot{border-top:1px solid var(--twj-linec);padding:26px 42px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.twj_back{color:var(--twj-ikb);text-decoration:none;border:1px solid var(--twj-ikb);padding:9px 26px;letter-spacing:.2em;font-size:.9rem;transition:background .25s,color .25s}
+.twj_back:hover{background:var(--twj-ikb);color:var(--twj-paper)}
+.twj_footNote{color:var(--twj-lead);font-size:.78rem;margin:0;letter-spacing:.05em}
+
+@media (max-width:760px){
+  .twj_top{padding:16px 22px}
+  .twj_stage{padding:0}
+  .twj_caption{display:none}
+  .twj_phone{width:100%;height:auto;min-height:calc(100dvh - 132px);border-radius:0;border:none;box-shadow:none}
+  .twj_phone::before{display:none}
+  .twj_screen{position:static;height:auto;padding:24px 18px 100px}
+  .twj_tabbar{position:fixed;left:0;right:0;bottom:0}
+  .twj_foot{padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .twj_tabbar{animation:none}
+  .twj_tab,.twj_action,.twj_badge{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="twj_top">
+  <a class="twj_brand" href="index.html">TWJ 形库</a>
+  <nav class="twj_nav" aria-label="章节导航">
+    <a class="twj_navLink" href="index.html">首页</a>
+    <a class="twj_navLink" href="iconfont-1.html">字体图标</a>
+    <a class="twj_navLink" href="iconfont-2.html">SVG 图标</a>
+    <a class="twj_navLink" href="iconfont-3.html">移动字体</a>
+    <a class="twj_navLink" href="iconfont-4.html" aria-current="page">移动 SVG</a>
+  </nav>
+</header>
+
+<main class="twj_stage">
+  <div class="twj_phone">
+    <div class="twj_screen" id="twj_screen">
+      <div class="twj_appHead">
+        <p class="twj_appBrand">仓配工作台</p>
+        <h1 class="twj_appTitle" id="twj_appTitle">工作台</h1>
+      </div>
+
+      <section class="twj_panel" id="twj_panel-home" role="tabpanel" aria-labelledby="twj_tab-home">
+        <p class="twj_greet">早，今天有 <strong>12 单</strong>待处理</p>
+        <div class="twj_actions">
+          <button class="twj_action" type="button"><svg class="twj_svgIcon twj_actionGlyph" aria-hidden="true"><use href="#icon-shengchengchukudan"></use></svg><span class="twj_actionText">出库单</span></button>
+          <button class="twj_action" type="button"><svg class="twj_svgIcon twj_actionGlyph" aria-hidden="true"><use href="#icon-dayin"></use></svg><span class="twj_actionText">打印</span></button>
+          <button class="twj_action" type="button"><svg class="twj_svgIcon twj_actionGlyph" aria-hidden="true"><use href="#icon-zidongfenpei"></use></svg><span class="twj_actionText">自动分配</span></button>
+        </div>
+        <p class="twj_sectionLabel">今日待办</p>
+        <div class="twj_list">
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-shengcheng"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">生成出库单 CK-1024</span><br><span class="twj_rowSub">青浦仓一号线</span></span>
+            <span class="twj_tag">待生成</span>
+          </div>
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-dayinmingxi"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">打印分拣明细 DY-339</span><br><span class="twj_rowSub">三号线波次 14:00</span></span>
+            <span class="twj_tag">待打印</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="twj_panel" id="twj_panel-search" role="tabpanel" aria-labelledby="twj_tab-search" hidden>
+        <div class="twj_search">
+          <svg class="twj_svgIcon twj_searchGlyph" aria-hidden="true"><use href="#icon-sousuo"></use></svg>
+          <input class="twj_searchInput" type="search" placeholder="搜索单号、品牌、地址" aria-label="搜索">
+        </div>
+        <p class="twj_sectionLabel">搜索历史</p>
+        <div class="twj_chips">
+          <span class="twj_chip">品牌核对</span>
+          <span class="twj_chip">分拣单调整</span>
+          <span class="twj_chip">全选</span>
+        </div>
+        <p class="twj_sectionLabel">猜你想找</p>
+        <div class="twj_list">
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-xinzeng"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">新建拣货单</span><br><span class="twj_rowSub">按波次自动生成</span></span>
+          </div>
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-baocun"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">保存常用筛选</span><br><span class="twj_rowSub">下次一键调出</span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="twj_panel" id="twj_panel-audit" role="tabpanel" aria-labelledby="twj_tab-audit" hidden>
+        <div class="twj_list">
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-shenhe"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">出库单 CK-1024</span><br><span class="twj_rowSub">提交于 13:42</span></span>
+            <span class="twj_tag">待审核</span>
+          </div>
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-fenjianxiantiaozheng"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">分拣线调整 SL-07</span><br><span class="twj_rowSub">提交于 13:20</span></span>
+            <span class="twj_tag">待审核</span>
+          </div>
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-dayinmingxi"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">打印明细 DY-339</span><br><span class="twj_rowSub">提交于 12:58</span></span>
+            <span class="twj_tag">待审核</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="twj_panel" id="twj_panel-addr" role="tabpanel" aria-labelledby="twj_tab-addr" hidden>
+        <div class="twj_list">
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-dizhi"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">仓一号</span><br><span class="twj_rowSub">上海市青浦区华徐公路 88 号</span></span>
+          </div>
+          <div class="twj_card twj_row">
+            <svg class="twj_svgIcon twj_rowGlyph" aria-hidden="true"><use href="#icon-dizhi"></use></svg>
+            <span class="twj_rowMain"><span class="twj_rowTitle">仓二号</span><br><span class="twj_rowSub">昆山市花桥镇花桥大道 21 号</span></span>
+          </div>
+        </div>
+        <button class="twj_action" type="button" style="width:100%;flex-direction:row;justify-content:center;padding:13px 6px">
+          <svg class="twj_svgIcon twj_actionGlyph" aria-hidden="true" style="width:18px;height:18px"><use href="#icon-xinzeng"></use></svg><span class="twj_actionText">新增地址</span>
+        </button>
+      </section>
+    </div>
+
+    <nav class="twj_tabbar" role="tablist" aria-label="底部导航">
+      <button class="twj_tab twj_tabOn" type="button" id="twj_tab-home" role="tab" aria-selected="true" aria-controls="twj_panel-home" data-twj-title="工作台">
+        <span class="twj_tabIcon"><svg class="twj_svgIcon twj_tabGlyph" aria-hidden="true"><use href="#icon-submenu2"></use></svg></span>
+        <span class="twj_tabText">工作台</span>
+      </button>
+      <button class="twj_tab" type="button" id="twj_tab-search" role="tab" aria-selected="false" aria-controls="twj_panel-search" data-twj-title="搜索">
+        <span class="twj_tabIcon"><svg class="twj_svgIcon twj_tabGlyph" aria-hidden="true"><use href="#icon-sousuo"></use></svg></span>
+        <span class="twj_tabText">搜索</span>
+      </button>
+      <button class="twj_tab" type="button" id="twj_tab-audit" role="tab" aria-selected="false" aria-controls="twj_panel-audit" data-twj-title="审核">
+        <span class="twj_tabIcon"><svg class="twj_svgIcon twj_tabGlyph" aria-hidden="true"><use href="#icon-shenhe"></use></svg><span class="twj_badge" id="twj_badgeAudit" aria-label="3 条待审核">3</span></span>
+        <span class="twj_tabText">审核</span>
+      </button>
+      <button class="twj_tab" type="button" id="twj_tab-addr" role="tab" aria-selected="false" aria-controls="twj_panel-addr" data-twj-title="地址">
+        <span class="twj_tabIcon"><svg class="twj_svgIcon twj_tabGlyph" aria-hidden="true"><use href="#icon-dizhi"></use></svg><span class="twj_dot" aria-label="有更新"></span></span>
+        <span class="twj_tabText">地址</span>
+      </button>
+    </nav>
+  </div>
+  <p class="twj_caption">第四章 线之掌，底栏图标以 iconfont SVG symbol 方式渲染，窄屏自动转为固定底栏</p>
+</main>
+
+<footer class="twj_foot">
+  <a class="twj_back" href="index.html">返回首页</a>
+  <p class="twj_footNote">TWJ 形库 掌上篇 图标由本目录 iconfont 以 SVG symbol 渲染</p>
+</footer>
+
+<script src="font/iconfont.js"></script>
+<script>
+(function () {
+  var twj_tabs = Array.prototype.slice.call(document.querySelectorAll('.twj_tab'));
+  var twj_panels = Array.prototype.slice.call(document.querySelectorAll('.twj_panel'));
+  var twj_title = document.getElementById('twj_appTitle');
+  var twj_screen = document.getElementById('twj_screen');
+  var twj_badge = document.getElementById('twj_badgeAudit');
+  function twj_activate(twj_btn) {
+    twj_tabs.forEach(function (twj_t) {
+      var twj_on = twj_t === twj_btn;
+      twj_t.classList.toggle('twj_tabOn', twj_on);
+      twj_t.setAttribute('aria-selected', twj_on ? 'true' : 'false');
+    });
+    twj_panels.forEach(function (twj_p) {
+      twj_p.hidden = (twj_p.id !== twj_btn.getAttribute('aria-controls'));
+    });
+    twj_title.textContent = twj_btn.getAttribute('data-twj-title');
+    if (twj_screen) { twj_screen.scrollTop = 0; }
+    if (twj_btn.getAttribute('aria-controls') === 'twj_panel-audit' && twj_badge) {
+      twj_badge.classList.add('twj_badgeOff');
+    }
+  }
+  twj_tabs.forEach(function (twj_t) {
+    twj_t.addEventListener('click', function () { twj_activate(twj_t); });
+  });
+})();
+</script>
+
+</body>
+</html>

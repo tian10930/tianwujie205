@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<style>
+        .box {
+            width: 400px;
+            height: 400px;
+            background-color: red;
+        }
+        #h2 {
+            width: 200px;
+            height: 200px;
+            background-color: blue;
+        }
+        #em {
+            width: 100px;
+            height: 100px;
+            background-color: yellow;
+        }
+    </style>
+    <!--冒泡是从子元素开始向父元素传播的 -->
+</head>
+<body>
+    <button id="mybutton" onclick="clickFun()">点击</button>
+    <div class="box">
+        <h2 id="h2">是冒泡还是<em id="em">捕获</em></h2>
+    </div>
+    <input type="text" id="input" placeholder="请输入内容">
+    <script>
+        function clickFun() {
+            alert("点击事件");
+        }
+        var box = document.getElementById("box");
+        box.addEventListener("click", function() {
+            alert("box");
+        }, false);
+        em.addEventListener("click", function() {
+            alert("em");
+        }, false);
+        h2.addEventListener("click", function() {
+            alert("h2");
+        }, false);
+        </script>
+</body>
+</html>

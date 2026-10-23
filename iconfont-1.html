@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实之形 | TWJ 形库</title>
+<meta name="description" content="TWJ 形库第一章：Font Awesome 字体图标样本。图标即字符，与文字同源同渲染。">
+<link rel="stylesheet" href="cdn/css/all.min.css">
+<style>
+:root{
+  --twj-ink:#1C2340;
+  --twj-deep:#131830;
+  --twj-chalk:#F2EEE3;
+  --twj-gold:#D9A441;
+  --twj-faint:#9AA0BE;
+  --twj-body:#C6CBDF;
+  --twj-line:#343B60;
+  --twj-display:"Kaiti SC","STKaiti",KaiTi,"Noto Serif SC",SimSun,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--twj-ink);color:var(--twj-chalk);font-family:"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+a:focus-visible,input:focus-visible{outline:2px solid var(--twj-gold);outline-offset:3px}
+
+.twj_top{display:flex;justify-content:space-between;align-items:center;padding:20px 42px;border-bottom:1px solid var(--twj-line)}
+.twj_brand{font-family:var(--twj-display);font-size:1.3rem;font-weight:700;color:var(--twj-chalk);text-decoration:none;letter-spacing:.14em}
+.twj_brand:hover{color:var(--twj-gold)}
+.twj_nav{display:flex;gap:30px}
+.twj_navLink{color:var(--twj-faint);text-decoration:none;font-size:.9rem;letter-spacing:.08em;transition:color .25s}
+.twj_navLink:hover{color:var(--twj-chalk)}
+.twj_navLink[aria-current="page"]{color:var(--twj-chalk);border-bottom:2px solid var(--twj-gold);padding-bottom:2px}
+
+.twj_hero{display:flex;gap:7vw;padding:9vh 42px 8vh;align-items:center}
+.twj_heroTitle{writing-mode:vertical-rl;font-family:var(--twj-display);font-size:clamp(3.4rem,9vw,7rem);font-weight:900;letter-spacing:.2em;line-height:1.15;margin:0;color:var(--twj-chalk)}
+.twj_heroBody{max-width:44ch;display:flex;flex-direction:column;gap:20px;justify-content:center}
+.twj_kicker{color:var(--twj-gold);font-size:.95rem;letter-spacing:.32em;margin:0}
+.twj_lede{color:var(--twj-body);font-size:1.02rem;margin:0}
+.twj_stamp{margin-left:auto;font-size:clamp(150px,26vw,360px);color:var(--twj-gold);line-height:1;display:flex;align-items:center;filter:drop-shadow(0 18px 34px rgba(0,0,0,.35))}
+.twj_stamp i{display:block;animation:twj_stampIn 1s cubic-bezier(.19,.8,.22,1) .2s both}
+@keyframes twj_stampIn{from{opacity:0;transform:scale(1.18) rotate(-4deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
+
+.twj_sheet{padding:0 42px 9vh}
+.twj_sheetTitle{font-family:var(--twj-display);font-size:1.7rem;font-weight:700;letter-spacing:.18em;margin:0 0 30px;color:var(--twj-gold)}
+.twj_grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;border:1px solid var(--twj-line);background:var(--twj-line)}
+.twj_cell{background:var(--twj-ink);padding:28px 12px 20px;display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;transition:background .25s}
+.twj_cell:hover{background:var(--twj-deep)}
+.twj_glyph{font-size:2.1rem;color:var(--twj-chalk);transition:color .25s;line-height:1}
+.twj_cell:hover .twj_glyph{color:var(--twj-gold)}
+.twj_name{font-size:.88rem;letter-spacing:.1em}
+.twj_latin{font-size:.72rem;color:var(--twj-faint);letter-spacing:.05em;font-family:Georgia,serif;font-style:italic}
+
+.twj_duo{padding:0 42px 10vh}
+.twj_duoLede{color:var(--twj-faint);font-size:.92rem;margin:0 0 30px;max-width:52ch}
+.twj_duoGrid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:36px 24px}
+.twj_duoCell{display:flex;align-items:center;gap:16px}
+.twj_duoSolid{font-size:1.9rem;color:var(--twj-gold);line-height:1}
+.twj_duoLine{font-size:1.9rem;color:var(--twj-chalk);opacity:.85;line-height:1}
+.twj_duoName{font-size:.75rem;color:var(--twj-faint);letter-spacing:.05em}
+
+.twj_foot{border-top:1px solid var(--twj-line);padding:28px 42px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.twj_back{color:var(--twj-gold);text-decoration:none;border:1px solid var(--twj-gold);padding:9px 26px;letter-spacing:.2em;font-size:.9rem;transition:background .25s,color .25s}
+.twj_back:hover{background:var(--twj-gold);color:var(--twj-deep)}
+.twj_footNote{color:var(--twj-faint);font-size:.78rem;margin:0;letter-spacing:.05em}
+
+@media (max-width:760px){
+  .twj_top{flex-direction:column;gap:12px;padding:18px 22px}
+  .twj_hero{flex-direction:column;padding:6vh 22px;gap:30px;align-items:flex-start}
+  .twj_heroTitle{writing-mode:horizontal-tb;font-size:clamp(2.6rem,12vw,4rem);letter-spacing:.14em}
+  .twj_stamp{margin:0;align-self:center;font-size:clamp(120px,40vw,220px)}
+  .twj_sheet,.twj_duo{padding-left:22px;padding-right:22px}
+  .twj_foot{padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .twj_stamp i{animation:none}
+  .twj_cell,.twj_glyph,.twj_back{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="twj_top">
+  <a class="twj_brand" href="index.html">TWJ 形库</a>
+  <nav class="twj_nav" aria-label="章节导航">
+    <a class="twj_navLink" href="index.html">首页</a>
+    <a class="twj_navLink" href="iconfont-1.html" aria-current="page">字体图标</a>
+    <a class="twj_navLink" href="iconfont-2.html">SVG 图标</a>
+  </nav>
+</header>
+
+<main>
+  <section class="twj_hero">
+    <h1 class="twj_heroTitle">实之形</h1>
+    <div class="twj_heroBody">
+      <p class="twj_kicker">第一章 字体图标样本</p>
+      <p class="twj_lede">图标即字符：与文字同源同渲染，随文字对齐、随文字变色，一枚字体文件加载之后处处可用，全程不需要一行脚本。此处陈列 Font Awesome 铸成的实心活字二十四枚。</p>
+    </div>
+    <div class="twj_stamp" aria-hidden="true"><i class="fa-solid fa-shapes"></i></div>
+  </section>
+
+  <section class="twj_sheet">
+    <h2 class="twj_sheetTitle">活字格盘</h2>
+    <ul class="twj_grid">
+      <li class="twj_cell"><i class="fa-solid fa-bolt twj_glyph" aria-hidden="true"></i><span class="twj_name">闪电</span><span class="twj_latin">bolt</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-heart twj_glyph" aria-hidden="true"></i><span class="twj_name">心</span><span class="twj_latin">heart</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-star twj_glyph" aria-hidden="true"></i><span class="twj_name">星</span><span class="twj_latin">star</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-music twj_glyph" aria-hidden="true"></i><span class="twj_name">音</span><span class="twj_latin">music</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-camera twj_glyph" aria-hidden="true"></i><span class="twj_name">相机</span><span class="twj_latin">camera</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-image twj_glyph" aria-hidden="true"></i><span class="twj_name">图</span><span class="twj_latin">image</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-envelope twj_glyph" aria-hidden="true"></i><span class="twj_name">信</span><span class="twj_latin">envelope</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-phone twj_glyph" aria-hidden="true"></i><span class="twj_name">话</span><span class="twj_latin">phone</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-bookmark twj_glyph" aria-hidden="true"></i><span class="twj_name">书签</span><span class="twj_latin">bookmark</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-fire twj_glyph" aria-hidden="true"></i><span class="twj_name">火</span><span class="twj_latin">fire</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-crown twj_glyph" aria-hidden="true"></i><span class="twj_name">冠</span><span class="twj_latin">crown</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-palette twj_glyph" aria-hidden="true"></i><span class="twj_name">调色</span><span class="twj_latin">palette</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-cube twj_glyph" aria-hidden="true"></i><span class="twj_name">方</span><span class="twj_latin">cube</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-gear twj_glyph" aria-hidden="true"></i><span class="twj_name">齿</span><span class="twj_latin">gear</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-magnifying-glass twj_glyph" aria-hidden="true"></i><span class="twj_name">察</span><span class="twj_latin">magnifying-glass</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-house twj_glyph" aria-hidden="true"></i><span class="twj_name">屋</span><span class="twj_latin">house</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-pen-nib twj_glyph" aria-hidden="true"></i><span class="twj_name">笔尖</span><span class="twj_latin">pen-nib</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-moon twj_glyph" aria-hidden="true"></i><span class="twj_name">月</span><span class="twj_latin">moon</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-sun twj_glyph" aria-hidden="true"></i><span class="twj_name">日</span><span class="twj_latin">sun</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-bell twj_glyph" aria-hidden="true"></i><span class="twj_name">铃</span><span class="twj_latin">bell</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-lock twj_glyph" aria-hidden="true"></i><span class="twj_name">锁</span><span class="twj_latin">lock</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-location-dot twj_glyph" aria-hidden="true"></i><span class="twj_name">位</span><span class="twj_latin">location-dot</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-droplet twj_glyph" aria-hidden="true"></i><span class="twj_name">滴</span><span class="twj_latin">droplet</span></li>
+      <li class="twj_cell"><i class="fa-solid fa-seedling twj_glyph" aria-hidden="true"></i><span class="twj_name">苗</span><span class="twj_latin">seedling</span></li>
+    </ul>
+  </section>
+
+  <section class="twj_duo">
+    <h2 class="twj_sheetTitle">同源两副面孔</h2>
+    <p class="twj_duoLede">同一个图标字体家族自带两种字重。左侧为 solid（饱满如印刷），右侧为 regular（清瘦如钢笔），字符编码相同，气质各異，这正是字体图标区别于普通图片的地方。</p>
+    <ul class="twj_duoGrid">
+      <li class="twj_duoCell"><i class="fa-solid fa-heart twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-heart twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">heart</span></li>
+      <li class="twj_duoCell"><i class="fa-solid fa-star twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-star twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">star</span></li>
+      <li class="twj_duoCell"><i class="fa-solid fa-bell twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-bell twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">bell</span></li>
+      <li class="twj_duoCell"><i class="fa-solid fa-envelope twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-envelope twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">envelope</span></li>
+      <li class="twj_duoCell"><i class="fa-solid fa-moon twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-moon twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">moon</span></li>
+      <li class="twj_duoCell"><i class="fa-solid fa-sun twj_duoSolid" aria-hidden="true"></i><i class="fa-regular fa-sun twj_duoLine" aria-hidden="true"></i><span class="twj_duoName">sun</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="twj_foot">
+  <a class="twj_back" href="index.html">返回首页</a>
+  <p class="twj_footNote">TWJ 形库 字体图标样本 图标由 Font Awesome 6.7.2 本地字体渲染</p>
+</footer>
+
+</body>
+</html>

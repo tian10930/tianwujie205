@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线之态 | TWJ 形库</title>
+<meta name="description" content="TWJ 形库第二章：Lucide SVG 图标样本。描边即笔迹，任意缩放不糊，笔锋可调。">
+<style>
+:root{
+  --twj-paper:#F1F2EF;
+  --twj-inkc:#1A1D23;
+  --twj-ikb:#002FA7;
+  --twj-lead:#6E747E;
+  --twj-body2:#3A3E46;
+  --twj-linec:#D9DBD3;
+  --twj-stroke-width:1.5;
+  --twj-display:"Kaiti SC","STKaiti",KaiTi,"Noto Serif SC",SimSun,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--twj-paper);color:var(--twj-inkc);font-family:"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+a:focus-visible,input:focus-visible{outline:2px solid var(--twj-ikb);outline-offset:3px}
+
+.twj_top{display:flex;justify-content:space-between;align-items:center;padding:20px 42px;border-bottom:1px solid var(--twj-linec)}
+.twj_brand{font-family:var(--twj-display);font-size:1.3rem;font-weight:700;color:var(--twj-inkc);text-decoration:none;letter-spacing:.14em}
+.twj_brand:hover{color:var(--twj-ikb)}
+.twj_nav{display:flex;gap:30px}
+.twj_navLink{color:var(--twj-lead);text-decoration:none;font-size:.9rem;letter-spacing:.08em;transition:color .25s}
+.twj_navLink:hover{color:var(--twj-inkc)}
+.twj_navLink[aria-current="page"]{color:var(--twj-inkc);border-bottom:2px solid var(--twj-ikb);padding-bottom:2px}
+
+.twj_hero{display:flex;gap:7vw;padding:9vh 42px 8vh;align-items:center}
+.twj_heroBody{max-width:46ch;display:flex;flex-direction:column;gap:20px;justify-content:center}
+.twj_kicker{color:var(--twj-ikb);font-size:.95rem;letter-spacing:.32em;margin:0}
+.twj_heroTitle{font-family:var(--twj-display);font-size:clamp(3rem,8vw,6rem);font-weight:700;letter-spacing:.16em;line-height:1.2;margin:0;color:var(--twj-inkc)}
+.twj_lede{color:var(--twj-body2);font-size:1.02rem;margin:0}
+.twj_quill{margin-left:auto;width:clamp(150px,24vw,330px);height:auto;color:var(--twj-ikb);flex-shrink:0}
+.twj_quill path{stroke-dasharray:100;stroke-dashoffset:100;animation:twj_draw 1.3s ease forwards}
+.twj_quill path:nth-of-type(2){animation-delay:.9s}
+.twj_quill path:nth-of-type(3){animation-delay:1.15s}
+@keyframes twj_draw{to{stroke-dashoffset:0}}
+
+.twj_sheet{padding:0 42px 10vh}
+.twj_sheetTitle{font-family:var(--twj-display);font-size:1.7rem;font-weight:700;letter-spacing:.18em;margin:0 0 26px;color:var(--twj-ikb)}
+.twj_ctl{display:flex;align-items:center;gap:18px;padding:16px 24px;border:1px solid var(--twj-linec);max-width:560px;margin:0 0 48px}
+.twj_ctlLabel{font-size:.9rem;letter-spacing:.14em;white-space:nowrap}
+.twj_range{flex:1;accent-color:var(--twj-ikb);min-width:120px}
+.twj_strokeVal{font-size:.85rem;color:var(--twj-lead);min-width:3ch;text-align:right;font-variant-numeric:tabular-nums}
+
+.twj_grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:40px 18px}
+.twj_cell{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
+.twj_glyph{width:2.2rem;height:2.2rem;color:var(--twj-inkc);stroke-width:var(--twj-stroke-width);transition:color .25s}
+.twj_cell:hover .twj_glyph{color:var(--twj-ikb)}
+.twj_name{font-size:.88rem;letter-spacing:.1em;color:var(--twj-body2)}
+.twj_latin{font-size:.72rem;color:var(--twj-lead);letter-spacing:.05em;font-family:Georgia,serif;font-style:italic}
+
+.twj_foot{border-top:1px solid var(--twj-linec);padding:28px 42px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.twj_back{color:var(--twj-ikb);text-decoration:none;border:1px solid var(--twj-ikb);padding:9px 26px;letter-spacing:.2em;font-size:.9rem;transition:background .25s,color .25s}
+.twj_back:hover{background:var(--twj-ikb);color:var(--twj-paper)}
+.twj_footNote{color:var(--twj-lead);font-size:.78rem;margin:0;letter-spacing:.05em}
+
+@media (max-width:760px){
+  .twj_top{flex-direction:column;gap:12px;padding:18px 22px}
+  .twj_hero{flex-direction:column-reverse;padding:6vh 22px;gap:30px;align-items:flex-start}
+  .twj_heroTitle{font-size:clamp(2.4rem,11vw,3.6rem)}
+  .twj_quill{margin:0;align-self:center;width:clamp(130px,36vw,220px)}
+  .twj_sheet{padding-left:22px;padding-right:22px}
+  .twj_foot{padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .twj_quill path{animation:none;stroke-dashoffset:0}
+  .twj_glyph{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="twj_top">
+  <a class="twj_brand" href="index.html">TWJ 形库</a>
+  <nav class="twj_nav" aria-label="章节导航">
+    <a class="twj_navLink" href="index.html">首页</a>
+    <a class="twj_navLink" href="iconfont-1.html">字体图标</a>
+    <a class="twj_navLink" href="iconfont-2.html" aria-current="page">SVG 图标</a>
+  </nav>
+</header>
+
+<main>
+  <section class="twj_hero">
+    <div class="twj_heroBody">
+      <p class="twj_kicker">第二章 SVG 图标样本</p>
+      <h1 class="twj_heroTitle">线之态</h1>
+      <p class="twj_lede">图标即笔迹：一条条路径随缩放而清晰，随样式而变色。此处陈列 Lucide 勾勒的线条图形二十四枚，笔锋粗细由你调遣，拖动下方的滑杆即可看到每一根线条重新落笔。</p>
+    </div>
+    <svg class="twj_quill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="羽毛笔图标，象征 SVG 描边">
+      <path pathLength="100" d="M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z"/>
+      <path pathLength="100" d="M16 8 2 22"/>
+      <path pathLength="100" d="M17.5 15H9"/>
+    </svg>
+  </section>
+
+  <section class="twj_sheet">
+    <h2 class="twj_sheetTitle">样本陈列</h2>
+    <div class="twj_ctl">
+      <label class="twj_ctlLabel" for="twj_strokeRange">笔锋粗细</label>
+      <input type="range" id="twj_strokeRange" class="twj_range" min="1" max="3" step="0.25" value="1.5">
+      <span class="twj_strokeVal" id="twj_strokeVal">1.5</span>
+    </div>
+    <ul class="twj_grid">
+      <li class="twj_cell"><i data-lucide="compass" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">罗盘</span><span class="twj_latin">compass</span></li>
+      <li class="twj_cell"><i data-lucide="feather" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">羽</span><span class="twj_latin">feather</span></li>
+      <li class="twj_cell"><i data-lucide="pencil" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">铅笔</span><span class="twj_latin">pencil</span></li>
+      <li class="twj_cell"><i data-lucide="pen-tool" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">钢笔</span><span class="twj_latin">pen-tool</span></li>
+      <li class="twj_cell"><i data-lucide="camera" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">相机</span><span class="twj_latin">camera</span></li>
+      <li class="twj_cell"><i data-lucide="image" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">图</span><span class="twj_latin">image</span></li>
+      <li class="twj_cell"><i data-lucide="heart" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">心</span><span class="twj_latin">heart</span></li>
+      <li class="twj_cell"><i data-lucide="star" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">星</span><span class="twj_latin">star</span></li>
+      <li class="twj_cell"><i data-lucide="sun" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">日</span><span class="twj_latin">sun</span></li>
+      <li class="twj_cell"><i data-lucide="moon" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">月</span><span class="twj_latin">moon</span></li>
+      <li class="twj_cell"><i data-lucide="cloud" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">云</span><span class="twj_latin">cloud</span></li>
+      <li class="twj_cell"><i data-lucide="cloud-rain" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">雨</span><span class="twj_latin">cloud-rain</span></li>
+      <li class="twj_cell"><i data-lucide="umbrella" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">伞</span><span class="twj_latin">umbrella</span></li>
+      <li class="twj_cell"><i data-lucide="music" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">音</span><span class="twj_latin">music</span></li>
+      <li class="twj_cell"><i data-lucide="headphones" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">耳机</span><span class="twj_latin">headphones</span></li>
+      <li class="twj_cell"><i data-lucide="mail" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">信</span><span class="twj_latin">mail</span></li>
+      <li class="twj_cell"><i data-lucide="phone" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">话</span><span class="twj_latin">phone</span></li>
+      <li class="twj_cell"><i data-lucide="map-pin" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">位</span><span class="twj_latin">map-pin</span></li>
+      <li class="twj_cell"><i data-lucide="navigation" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">航</span><span class="twj_latin">navigation</span></li>
+      <li class="twj_cell"><i data-lucide="anchor" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">锚</span><span class="twj_latin">anchor</span></li>
+      <li class="twj_cell"><i data-lucide="leaf" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">叶</span><span class="twj_latin">leaf</span></li>
+      <li class="twj_cell"><i data-lucide="flower" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">花</span><span class="twj_latin">flower</span></li>
+      <li class="twj_cell"><i data-lucide="mountain" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">山</span><span class="twj_latin">mountain</span></li>
+      <li class="twj_cell"><i data-lucide="coffee" class="twj_glyph" aria-hidden="true"></i><span class="twj_name">咖啡</span><span class="twj_latin">coffee</span></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="twj_foot">
+  <a class="twj_back" href="index.html">返回首页</a>
+  <p class="twj_footNote">TWJ 形库 SVG 图标样本 图标由 Lucide 0.469.0 本地渲染</p>
+</footer>
+
+<script src="cdn/lucide.min.js"></script>
+<script>
+(function () {
+  var twj_hasLucide = window.lucide && typeof window.lucide.createIcons === 'function';
+  if (twj_hasLucide) {
+    window.lucide.createIcons();
+  }
+  var twj_range = document.getElementById('twj_strokeRange');
+  var twj_val = document.getElementById('twj_strokeVal');
+  twj_range.addEventListener('input', function () {
+    document.documentElement.style.setProperty('--twj-stroke-width', twj_range.value);
+    twj_val.textContent = twj_range.value;
+  });
+})();
+</script>
+
+</body>
+</html>
