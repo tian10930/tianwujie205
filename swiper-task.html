@@ -32,6 +32,7 @@
   /* twj 轮播外观 */
   .twj_swiper{border-radius:14px;overflow:hidden;position:relative}
   .twj_swiper .swiper-slide img{width:100%;height:300px;object-fit:cover;display:block}
+  #twjExSw{height:300px}
   .twj_cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(7,15,35,.82));color:#fff;padding:34px 18px 14px}
   .twj_cap h3{font-size:16.5px;margin:0;color:#fff}
   .twj_cap p{font-size:13px;margin:2px 0 0;color:#dbe4ff}
@@ -46,6 +47,7 @@
   @media (max-width:600px){
     body{padding:22px 10px 40px}
     .twj_swiper .swiper-slide img{height:190px}
+    #twjExSw{height:190px}
     .twj_sec{padding:18px 16px}
   }
 </style>
@@ -106,7 +108,7 @@
   <!-- ═══ 任务三：综合创作 ═══ -->
   <section class="twj_sec">
     <div class="twj_tag">⭐⭐⭐ 任务三 · 综合创作（第六展品 + 超纲能力）</div>
-    <h2>光影展新增第六件展品 · 支持键盘 ← → 翻页</h2>
+    <h2>光影展新增第六件展品 · 垂直方向切换（仿 demo 090-vertical）+ 键盘 ↑ ↓ 翻页</h2>
     <div class="twj_swiper swiper" id="twjExSw">
       <div class="swiper-wrapper">
         <div class="swiper-slide"><img src="swiper-imgs/tiangong_1.jpg" alt="天宫空间站"><div class="twj_cap"><h3>天宫空间站</h3><p>巡天遥看一千河</p></div></div>
@@ -120,9 +122,10 @@
     </div>
     <h3>答辩四连问</h3>
     <p><strong>① 第六件展品为什么是它？</strong>爱达·魔都号是我国首艘国产大型邮轮，2024 年 1 月 1 日首航，与天宫、C919 一样是“从无到有”的大国重器，让光影展覆盖空、天、海、陆。配图为 AI 生成的 16:9 实景图，已本地化保存为 swiper-imgs/aida_1_1.jpg。</p>
-    <p><strong>② 新增的超纲能力是什么？</strong>keyboard 键盘控制——开启后按键盘 ←/→ 即可翻页；<code>onlyInViewport: true</code> 让轮播滚出视野后按键不抢事件，网页照常滚动。</p>
+    <p><strong>② 新增的超纲能力是什么？</strong>keyboard 键盘控制——本页轮播为垂直方向（direction: 'vertical'，仿官方 demo 090-vertical），开启后按键盘 ↑/↓ 即可翻页；<code>onlyInViewport: true</code> 让轮播滚出视野后按键不抢事件，网页照常滚动。</p>
     <p><strong>③ 初始化代码怎么写的？</strong>在配置对象里加 <code>keyboard: { enabled: true, onlyInViewport: true }</code>，再把 <code>loop</code>、自动播放、圆点分页器一并配上（见下方代码）。</p>
     <div class="twj_pre"><span class="twj_c">var twjExSwiper = new Swiper('#twjExSw', {</span>
+  direction: 'vertical',   <span class="twj_c">// 垂直切换（仿 demo 090-vertical）</span>
   loop: true,
   speed: 700,
   autoplay: { delay: 2600, disableOnInteraction: false },
@@ -183,14 +186,15 @@
     twjBtn.addEventListener('click', twj_rotBtnsClick);
   });
 
-  // ── twj 初始化任务三的光影展轮播：第六展品爱达·魔都号 + keyboard 键盘控制 ──
+  // ── twj 初始化任务三的光影展轮播：垂直切换（仿 demo 090-vertical）+ 第六展品爱达·魔都号 + keyboard 键盘控制 ──
   var twjExSwiper = new Swiper('#twjExSw', {
+    direction: 'vertical',                               // 垂直方向切换：照片上下滚动（参照官方 demo 090-vertical）
     loop: true,                                          // 无缝循环
     speed: 700,                                          // 切换动画 700 毫秒
     autoplay: { delay: 2600, disableOnInteraction: false }, // 自动播放且交互后不停
-    pagination: { el: '#twjExPag', clickable: true },    // 圆点分页器可点击
+    pagination: { el: '#twjExPag', clickable: true },    // 圆点分页器可点击（垂直模式下自动显示在右侧）
     keyboard: {
-      enabled: true,                                     // 超纲能力：键盘 ←/→ 翻页
+      enabled: true,                                     // 超纲能力：键盘 ↑/↓ 翻页
       onlyInViewport: true                               // 轮播在可视区外时不响应按键，避免抢页面滚动
     }
   });
