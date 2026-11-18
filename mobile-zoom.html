@@ -132,6 +132,26 @@
       color: #4f46e5;
       font-size: 12.5px;
     }
+    /* twj_demo：任务三操作演示视频区域 */
+    .twj_demo {
+      margin-top: 20px;
+      padding: 16px 18px 18px;
+      border: 1px solid #e4e9f2;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    .twj_demo h2 {
+      color: #1d2433;
+      font-size: 14.5px;
+    }
+    .twj_demo_video {
+      display: block;
+      width: 100%;
+      max-height: 70vh;
+      margin-top: 12px;
+      border-radius: 12px;
+      background: #0f172a;
+    }
   </style>
 </head>
 <body>
@@ -154,6 +174,14 @@
   <section class="twj_guide">
     <h2>操作说明</h2>
     <p>双指捏合 / 张开放大到 <code>1x ~ 4x</code>，缩放以两指中点为基准；双击在 <code>1x</code> 与 <code>2x</code> 之间切换；放大后单指可拖动查看细节，松手时自动拉回边界内。</p>
+  </section>
+
+  <section class="twj_demo" aria-labelledby="twjDemoTitle">
+    <h2 id="twjDemoTitle">任务三 · 操作演示</h2>
+    <video class="twj_demo_video" controls playsinline preload="metadata">
+      <source src="videos/twj_mobile_demo.mp4" type="video/mp4">
+      您的浏览器不支持视频播放，请使用新版浏览器打开。
+    </video>
   </section>
 
 <script>
