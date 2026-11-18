@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰（学号 24002120205）
+  建立时间：2026-11-18
+  使用大模型：DeepSeek-V4.1-Flash
+  功能名称：摇一摇彩蛋（监听 devicemotion 合加速度抽今日菜谱，含 1.5 秒冷却、iOS 权限申请与降级按钮）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="摇一摇手机随机抽取今日菜谱，含权限申请与不支持时的降级方案">
+  <link rel="icon" href="data:,">
+  <title>摇一摇 · 抽今日菜谱</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      min-height: 100vh;
+      padding: 22px 16px 40px;
+      color: #1d2433;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(129, 140, 248, 0.24), transparent 22rem),
+        radial-gradient(circle at 86% 16%, rgba(103, 232, 249, 0.2), transparent 20rem),
+        #f6f8fc;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+    .twj_head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .twj_head h1 {
+      font-size: 20px;
+    }
+    .twj_back {
+      flex: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      font-size: 12.5px;
+      text-decoration: none;
+    }
+    .twj_stage {
+      padding: 34px 20px 30px;
+      border-radius: 22px;
+      background: #fff;
+      text-align: center;
+      box-shadow: 0 18px 40px rgba(29, 42, 68, 0.12);
+    }
+    .twj_phone {
+      font-size: 46px;
+      line-height: 1;
+      animation: twj_wiggle 1.6s ease-in-out infinite;
+    }
+    /* 手机小幅左右摆动，提示"摇一摇"这个动作 */
+    @keyframes twj_wiggle {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(8deg); }
+    }
+    .twj_tip {
+      margin: 16px 0 6px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .twj_sub {
+      color: #6b7488;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .twj_result {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 96px;
+      margin-top: 20px;
+      padding: 16px;
+      border: 1px dashed #d8dfec;
+      border-radius: 16px;
+      color: #6b7488;
+      font-size: 14px;
+    }
+    .twj_result.twj_filled {
+      border-style: solid;
+      border-color: rgba(79, 70, 229, 0.25);
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(6, 182, 212, 0.08));
+      color: #1d2433;
+    }
+    .twj_dish_emoji {
+      font-size: 40px;
+      line-height: 1;
+    }
+    .twj_dish_name {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .twj_dish_desc {
+      margin-top: 4px;
+      color: #6b7488;
+      font-size: 12.5px;
+    }
+    /* 抽中结果时的弹出动画 */
+    .twj_pop {
+      animation: twj_pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+    }
+    @keyframes twj_pop {
+      0% { transform: scale(0.72); opacity: 0.4; }
+      70% { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .twj_actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .twj_btn {
+      padding: 11px 22px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      font-size: 13.5px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .twj_btn.twj_ghost {
+      color: #4f46e5;
+      background: rgba(79, 70, 229, 0.1);
+    }
+    .twj_guide {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border: 1px solid #e4e9f2;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #5b6478;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .twj_guide h2 {
+      margin-bottom: 6px;
+      color: #1d2433;
+      font-size: 14.5px;
+    }
+    .twj_guide code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: rgba(79, 70, 229, 0.09);
+      color: #4f46e5;
+      font-size: 12.5px;
+    }
+    .twj_guide li {
+      margin-left: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header class="twj_head">
+    <h1>摇一摇 · 今日菜谱</h1>
+    <a class="twj_back" href="index.html">返回首页</a>
+  </header>
+
+  <div class="twj_stage">
+    <div class="twj_phone">📱</div>
+    <p class="twj_tip" id="twjTip">摇一摇手机，抽今日菜谱</p>
+    <p class="twj_sub" id="twjSub">连续晃动手机即可，一次摇动只抽一次</p>
+
+    <div class="twj_result" id="twjResult">还没有结果，摇一摇试试</div>
+
+    <div class="twj_actions">
+      <button class="twj_btn" id="twjPermBtn" type="button" hidden>开启摇一摇权限</button>
+      <button class="twj_btn twj_ghost" id="twjManualBtn" type="button" hidden>点我抽一次</button>
+    </div>
+  </div>
+
+  <section class="twj_guide">
+    <h2>实现要点</h2>
+    <ul>
+      <li>监听 <code>devicemotion</code>，用 <code>accelerationIncludingGravity</code> 三轴分量求合加速度 <code>√(x²+y²+z²)</code>。</li>
+      <li>合加速度超过 <code>18</code> 判定为摇动，触发后进入 <code>1.5 秒</code>冷却，一次摇动只抽一次。</li>
+      <li><code>accelerationIncludingGravity</code> 含重力，静止时合加速度约 <code>9.8</code>；<code>acceleration</code> 已做重力补偿，静止时接近 <code>0</code>。摇动用前者更稳，判断"放下手机"用后者更准。</li>
+      <li>iOS 13+ 需要用户手势触发 <code>DeviceMotionEvent.requestPermission()</code>，所以提供权限按钮。</li>
+      <li>取不到传感器数据（如电脑浏览器）时显示提示并给出"点我抽一次"的降级按钮，页面不报错、不白屏。</li>
+    </ul>
+  </section>
+
+<script>
+  // 菜谱数据：名称、表情与一句描述
+  var twj_dishes = [
+    { name: '北京烤鸭', emoji: '🦆', desc: '片皮蘸酱卷薄饼，今天就吃它' },
+    { name: '麻婆豆腐', emoji: '🌶️', desc: '麻辣鲜香，配米饭最佳' },
+    { name: '兰州牛肉面', emoji: '🍜', desc: '一清二白三红四绿，来一碗' },
+    { name: '白切鸡', emoji: '🍗', desc: '皮爽肉滑，蘸姜葱蓉' },
+    { name: '小笼包', emoji: '🥟', desc: '轻轻提、慢慢移、先开窗、后喝汤' },
+    { name: '热干面', emoji: '🍝', desc: '芝麻酱拌开，趁热吃' },
+    { name: '过桥米线', emoji: '🍲', desc: '滚汤烫熟，鲜到眉毛掉' },
+    { name: '肉夹馍', emoji: '🥙', desc: '腊汁肉配白吉馍，实在' }
+  ];
+
+  var twj_threshold = 18;     // 合加速度超过该值判定为摇动
+  var twj_cooldown = 1500;    // 冷却时间，防止一次摇动连续触发
+  var twj_cooling = false;    // 是否处于冷却期
+  var twj_coolTimer = null;   // 冷却计时器
+  var twj_hasData = false;    // 是否收到过有效的传感器数据
+  var twj_listening = false;  // 是否已开始监听 devicemotion
+
+  // 随机抽一道菜并播放弹出动画
+  function twj_pickDish() {
+    var twj_dish = twj_dishes[Math.floor(Math.random() * twj_dishes.length)];
+    var twj_result = document.getElementById('twjResult');
+
+    twj_result.className = 'twj_result twj_filled';
+    twj_result.innerHTML = '';
+    twj_result.appendChild(twj_createContent(twj_dish));
+
+    // 先移除再添加动画类，保证连续两次抽中也能重新播放动画
+    twj_result.classList.remove('twj_pop');
+    void twj_result.offsetWidth;
+    twj_result.classList.add('twj_pop');
+  }
+
+  // 生成结果区的内容节点：表情 + 菜名 + 描述
+  function twj_createContent(twj_dish) {
+    var twj_box = document.createElement('div');
+
+    var twj_emoji = document.createElement('div');
+    twj_emoji.className = 'twj_dish_emoji';
+    twj_emoji.textContent = twj_dish.emoji;
+
+    var twj_name = document.createElement('div');
+    twj_name.className = 'twj_dish_name';
+    twj_name.textContent = twj_dish.name;
+
+    var twj_desc = document.createElement('div');
+    twj_desc.className = 'twj_dish_desc';
+    twj_desc.textContent = twj_dish.desc;
+
+    twj_box.appendChild(twj_emoji);
+    twj_box.appendChild(twj_name);
+    twj_box.appendChild(twj_desc);
+    return twj_box;
+  }
+
+  // 进入冷却期，冷却结束前忽略新的摇动
+  function twj_startCooldown() {
+    twj_cooling = true;
+    clearTimeout(twj_coolTimer);
+    twj_coolTimer = setTimeout(function () {
+      twj_cooling = false;
+      document.getElementById('twjSub').textContent = '冷却结束，可以继续摇';
+    }, twj_cooldown);
+    document.getElementById('twjSub').textContent = '刚抽过一份，1.5 秒后再摇';
+  }
+
+  // 处理 devicemotion：计算合加速度，超过阈值就抽菜
+  function twj_onMotion(twj_event) {
+    var twj_acc = twj_event.accelerationIncludingGravity;
+    // 设备拿不到数据时三个分量可能为 null，直接跳过
+    if (!twj_acc || twj_acc.x === null || twj_acc.y === null || twj_acc.z === null) {
+      return;
+    }
+
+    if (!twj_hasData) {
+      twj_hasData = true;
+      twj_hideUnsupported();
+    }
+
+    var twj_magnitude = Math.sqrt(
+      twj_acc.x * twj_acc.x + twj_acc.y * twj_acc.y + twj_acc.z * twj_acc.z
+    );
+
+    if (twj_magnitude > twj_threshold && !twj_cooling) {
+      twj_pickDish();
+      twj_startCooldown();
+    }
+  }
+
+  // 显示"设备不支持"的提示，并放出降级按钮
+  function twj_showUnsupported(twj_text) {
+    document.getElementById('twjTip').textContent = '当前设备不支持，请用手机打开';
+    document.getElementById('twjSub').textContent = twj_text;
+    document.getElementById('twjManualBtn').hidden = false;
+  }
+
+  // 收到有效数据后收起"不支持"提示（保留手动按钮方便演示）
+  function twj_hideUnsupported() {
+    document.getElementById('twjTip').textContent = '摇一摇手机，抽今日菜谱';
+    document.getElementById('twjManualBtn').hidden = true;
+  }
+
+  // 开始监听传感器；2.5 秒内没有有效数据则判定为不支持
+  function twj_startListen() {
+    if (twj_listening) {
+      return;
+    }
+    twj_listening = true;
+    window.addEventListener('devicemotion', twj_onMotion);
+
+    setTimeout(function () {
+      if (!twj_hasData) {
+        twj_showUnsupported('没检测到加速度传感器，可以点下面的按钮抽一次');
+      }
+    }, 2500);
+  }
+
+  // iOS 权限按钮：用户点击后申请传感器权限
+  function twj_onPermissionClick() {
+    DeviceMotionEvent.requestPermission().then(function (twj_state) {
+      if (twj_state === 'granted') {
+        document.getElementById('twjPermBtn').hidden = true;
+        document.getElementById('twjSub').textContent = '权限已开启，摇一摇手机试试';
+        twj_startListen();
+      } else {
+        twj_showUnsupported('权限被拒绝，可点下面的按钮抽一次');
+      }
+    }).catch(function () {
+      twj_showUnsupported('权限申请失败，可点下面的按钮抽一次');
+    });
+  }
+
+  // 初始化：根据设备能力决定直接监听、先申请权限还是走降级方案
+  function twj_init() {
+    document.getElementById('twjManualBtn').addEventListener('click', twj_pickDish);
+
+    if (typeof DeviceMotionEvent === 'undefined') {
+      twj_showUnsupported('这个浏览器没有 devicemotion 事件，可点下面的按钮抽一次');
+      return;
+    }
+
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      // iOS 13+ 必须在用户手势里申请权限
+      var twj_permBtn = document.getElementById('twjPermBtn');
+      twj_permBtn.hidden = false;
+      twj_permBtn.addEventListener('click', twj_onPermissionClick);
+      document.getElementById('twjSub').textContent = 'iOS 需要先点上方按钮授权运动与方向';
+      return;
+    }
+
+    twj_startListen();
+  }
+
+  twj_init();
+</script>
+</body>
+</html>

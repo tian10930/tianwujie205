@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰（学号 24002120205）
+  建立时间：2026-11-18
+  使用大模型：DeepSeek-V4.1-Flash
+  功能名称：图片查看器（双指以中点缩放 1~4 倍、双击 1x/2x 切换、放大后单指拖动、边界限制）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="移动端图片查看器：双指缩放、双击放大、放大后拖动">
+  <link rel="icon" href="data:,">
+  <title>图片查看器 · 双指缩放</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      min-height: 100vh;
+      padding: 22px 16px 40px;
+      color: #1d2433;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(129, 140, 248, 0.24), transparent 22rem),
+        radial-gradient(circle at 88% 14%, rgba(103, 232, 249, 0.2), transparent 20rem),
+        #f6f8fc;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+    .twj_head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .twj_head h1 {
+      font-size: 20px;
+    }
+    .twj_back {
+      flex: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      font-size: 12.5px;
+      text-decoration: none;
+    }
+    /* twj_viewer：手势容器，overflow:hidden 裁掉放大后溢出部分，touch-action:none 接管全部手势 */
+    .twj_viewer {
+      position: relative;
+      height: 62vh;
+      min-height: 320px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #0f172a;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      box-shadow: 0 18px 40px rgba(29, 42, 68, 0.18);
+    }
+    /* 图片铺满容器，缩放与位移都通过 transform 完成 */
+    .twj_photo {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center center;
+      will-change: transform;
+    }
+    /* 双击与复位需要过渡，双指缩放、拖动时不能带过渡，否则会"拖影" */
+    .twj_photo.twj_animating {
+      transition: transform 0.25s ease;
+    }
+    .twj_scale_tag {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.55);
+      color: #fff;
+      font-size: 12.5px;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+    }
+    .twj_hint {
+      margin: 14px 0 0;
+      color: #6b7488;
+      font-size: 13px;
+      line-height: 1.8;
+      text-align: center;
+    }
+    .twj_actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 14px;
+    }
+    .twj_reset {
+      padding: 10px 22px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      font-size: 13.5px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .twj_guide {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border: 1px solid #e4e9f2;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.8);
+      color: #5b6478;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .twj_guide h2 {
+      margin-bottom: 6px;
+      color: #1d2433;
+      font-size: 14.5px;
+    }
+    .twj_guide code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: rgba(79, 70, 229, 0.09);
+      color: #4f46e5;
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+<body>
+  <header class="twj_head">
+    <h1>图片查看器</h1>
+    <a class="twj_back" href="index.html">返回首页</a>
+  </header>
+
+  <div class="twj_viewer" id="twjViewer">
+    <img class="twj_photo" id="twjPhoto" src="images/poems/twj_lushanpubu.jpg" alt="庐山瀑布水墨画">
+    <div class="twj_scale_tag" id="twjScaleTag">1.0x</div>
+  </div>
+
+  <p class="twj_hint" id="twjHint">双指缩放请用手机打开；电脑可用浏览器设备模式模拟</p>
+
+  <div class="twj_actions">
+    <button class="twj_reset" id="twjResetBtn" type="button">复位到 1x</button>
+  </div>
+
+  <section class="twj_guide">
+    <h2>操作说明</h2>
+    <p>双指捏合 / 张开放大到 <code>1x ~ 4x</code>，缩放以两指中点为基准；双击在 <code>1x</code> 与 <code>2x</code> 之间切换；放大后单指可拖动查看细节，松手时自动拉回边界内。</p>
+  </section>
+
+<script>
+  var twj_photo = document.getElementById('twjPhoto');
+  var twj_viewer = document.getElementById('twjViewer');
+  var twj_scaleTag = document.getElementById('twjScaleTag');
+  var twj_hint = document.getElementById('twjHint');
+
+  var twj_MIN_SCALE = 1;   // 最小缩放比例
+  var twj_MAX_SCALE = 4;   // 最大缩放比例
+
+  var twj_scale = 1;       // 当前缩放比例
+  var twj_tx = 0;          // 当前横向位移（px）
+  var twj_ty = 0;          // 当前纵向位移（px）
+
+  var twj_pinchStartDist = 0;   // 双指按下时的两指距离
+  var twj_pinchStartScale = 1;  // 双指按下时的缩放比例
+  var twj_pinchStartTx = 0;     // 双指按下时的横向位移
+  var twj_pinchStartTy = 0;     // 双指按下时的纵向位移
+  var twj_pinchMidX = 0;        // 双指中点相对容器中心的横向坐标
+  var twj_pinchMidY = 0;        // 双指中点相对容器中心的纵向坐标
+
+  var twj_dragStartX = 0;       // 单指拖动起点 X
+  var twj_dragStartY = 0;       // 单指拖动起点 Y
+  var twj_dragBaseTx = 0;       // 拖动开始时的位移 X
+  var twj_dragBaseTy = 0;       // 拖动开始时的位移 Y
+  var twj_moved = false;        // 本次触摸是否发生过明显移动（用于区分拖动和点按）
+
+  var twj_lastTapTime = 0;      // 上一次点按结束的时间，用于识别双击
+
+  // 把缩放与位移写回样式，twj_animate 为 true 时带 0.25s 过渡
+  function twj_applyTransform(twj_animate) {
+    twj_photo.classList.toggle('twj_animating', !!twj_animate);
+    twj_photo.style.transform = 'translate(' + twj_tx + 'px, ' + twj_ty + 'px) scale(' + twj_scale + ')';
+    twj_scaleTag.textContent = twj_scale.toFixed(1) + 'x';
+  }
+
+  // 取容器中心在屏幕上的坐标，所有缩放位移都以它为原点计算
+  function twj_getCenter() {
+    var twj_rect = twj_viewer.getBoundingClientRect();
+    return { x: twj_rect.left + twj_rect.width / 2, y: twj_rect.top + twj_rect.height / 2 };
+  }
+
+  // 把位移限制在边界内：放大后最多看到图片边缘，1x 时不允许拖动
+  function twj_clampTranslation() {
+    var twj_rect = twj_viewer.getBoundingClientRect();
+    var twj_maxX = (twj_scale - 1) * twj_rect.width / 2;
+    var twj_maxY = (twj_scale - 1) * twj_rect.height / 2;
+    twj_tx = Math.min(twj_maxX, Math.max(-twj_maxX, twj_tx));
+    twj_ty = Math.min(twj_maxY, Math.max(-twj_maxY, twj_ty));
+  }
+
+  // 求两个手指之间的距离
+  function twj_getDistance(twjA, twjB) {
+    var twj_dx = twjA.clientX - twjB.clientX;
+    var twj_dy = twjA.clientY - twjB.clientY;
+    return Math.sqrt(twj_dx * twj_dx + twj_dy * twj_dy);
+  }
+
+  // 以屏幕上的某一点为锚点缩放到目标比例，保证该点下的画面不移动
+  function twj_zoomAt(twj_targetScale, twj_clientX, twj_clientY, twj_animate) {
+    var twj_center = twj_getCenter();
+    var twj_mx = twj_clientX - twj_center.x;
+    var twj_my = twj_clientY - twj_center.y;
+
+    // 锚点在图片自身坐标系里的位置（缩放前）
+    var twj_px = (twj_mx - twj_tx) / twj_scale;
+    var twj_py = (twj_my - twj_ty) / twj_scale;
+
+    twj_scale = Math.min(twj_MAX_SCALE, Math.max(twj_MIN_SCALE, twj_targetScale));
+    twj_tx = twj_mx - twj_scale * twj_px;
+    twj_ty = twj_my - twj_scale * twj_py;
+
+    // 回到 1x 时直接居中，避免残留位移
+    if (twj_scale === 1) {
+      twj_tx = 0;
+      twj_ty = 0;
+    }
+    twj_clampTranslation();
+    twj_applyTransform(twj_animate);
+  }
+
+  // 手指按下：区分单指拖动与双指缩放，并记录各自的起始状态
+  function twj_onTouchStart(twj_event) {
+    twj_moved = false;
+
+    if (twj_event.touches.length === 2) {
+      var twj_center = twj_getCenter();
+      twj_pinchStartDist = twj_getDistance(twj_event.touches[0], twj_event.touches[1]);
+      twj_pinchStartScale = twj_scale;
+      twj_pinchStartTx = twj_tx;
+      twj_pinchStartTy = twj_ty;
+      twj_pinchMidX = (twj_event.touches[0].clientX + twj_event.touches[1].clientX) / 2 - twj_center.x;
+      twj_pinchMidY = (twj_event.touches[0].clientY + twj_event.touches[1].clientY) / 2 - twj_center.y;
+      return;
+    }
+
+    if (twj_event.touches.length === 1) {
+      twj_dragStartX = twj_event.touches[0].clientX;
+      twj_dragStartY = twj_event.touches[0].clientY;
+      twj_dragBaseTx = twj_tx;
+      twj_dragBaseTy = twj_ty;
+      // 拖动过程中关闭过渡，保证跟手
+      twj_photo.classList.remove('twj_animating');
+    }
+  }
+
+  // 手指移动：双指按距离比例缩放，单指在放大状态下拖动图片
+  function twj_onTouchMove(twj_event) {
+    // 接管手势，阻止页面跟着滚动或缩放
+    twj_event.preventDefault();
+
+    if (twj_event.touches.length === 2) {
+      var twj_dist = twj_getDistance(twj_event.touches[0], twj_event.touches[1]);
+      if (!twj_pinchStartDist) {
+        return;
+      }
+      var twj_center = twj_getCenter();
+      var twj_midX = (twj_event.touches[0].clientX + twj_event.touches[1].clientX) / 2 - twj_center.x;
+      var twj_midY = (twj_event.touches[0].clientY + twj_event.touches[1].clientY) / 2 - twj_center.y;
+
+      var twj_targetScale = twj_pinchStartScale * (twj_dist / twj_pinchStartDist);
+      twj_targetScale = Math.min(twj_MAX_SCALE, Math.max(twj_MIN_SCALE, twj_targetScale));
+
+      // 双指按下时中点对应的图片坐标，缩放后仍让它停在新中点下方 → 画面不会跳
+      var twj_px = (twj_pinchMidX - twj_pinchStartTx) / twj_pinchStartScale;
+      var twj_py = (twj_pinchMidY - twj_pinchStartTy) / twj_pinchStartScale;
+
+      twj_scale = twj_targetScale;
+      twj_tx = twj_midX - twj_scale * twj_px;
+      twj_ty = twj_midY - twj_scale * twj_py;
+
+      twj_moved = true;
+      twj_clampTranslation();
+      twj_applyTransform(false);
+      return;
+    }
+
+    if (twj_event.touches.length === 1 && twj_scale > 1) {
+      var twj_dx = twj_event.touches[0].clientX - twj_dragStartX;
+      var twj_dy = twj_event.touches[0].clientY - twj_dragStartY;
+
+      if (Math.abs(twj_dx) > 4 || Math.abs(twj_dy) > 4) {
+        twj_moved = true;
+      }
+      twj_tx = twj_dragBaseTx + twj_dx;
+      twj_ty = twj_dragBaseTy + twj_dy;
+      twj_applyTransform(false);
+    }
+  }
+
+  // 手指抬起：松手后把图片拉回边界内，并识别双击
+  function twj_onTouchEnd(twj_event) {
+    if (twj_event.touches.length > 0) {
+      return;
+    }
+
+    twj_pinchStartDist = 0;
+    twj_clampTranslation();
+    twj_applyTransform(true);
+
+    // 有明显拖动就不是点按，不参与双击判定
+    if (twj_moved) {
+      twj_lastTapTime = 0;
+      return;
+    }
+
+    var twj_now = Date.now();
+    if (twj_now - twj_lastTapTime < 300) {
+      // 双击：1x 放大到 2x，2x 以上回到 1x
+      var twj_point = twj_event.changedTouches[0];
+      if (twj_scale > 1.05) {
+        twj_zoomAt(1, twj_point.clientX, twj_point.clientY, true);
+      } else {
+        twj_zoomAt(2, twj_point.clientX, twj_point.clientY, true);
+      }
+      twj_lastTapTime = 0;
+    } else {
+      twj_lastTapTime = twj_now;
+    }
+  }
+
+  // 触摸被系统中断（如来电、手势返回）时复位临时状态，避免下次操作错乱
+  function twj_onTouchCancel() {
+    twj_pinchStartDist = 0;
+    twj_clampTranslation();
+    twj_applyTransform(true);
+  }
+
+  // 窗口尺寸或横竖屏变化：状态都保存在变量里，重新应用并校正边界即可不丢缩放
+  function twj_onResize() {
+    twj_clampTranslation();
+    twj_applyTransform(false);
+  }
+
+  // 复位按钮：回到 1x 并居中
+  function twj_onReset() {
+    twj_zoomAt(1, twj_getCenter().x, twj_getCenter().y, true);
+    twj_hint.textContent = '已复位到 1x，可重新双击或双指缩放';
+  }
+
+  // 初始化：绑定事件，并按设备是否支持触摸给出提示
+  function twj_init() {
+    twj_viewer.addEventListener('touchstart', twj_onTouchStart, { passive: true });
+    // touchmove 必须非 passive，才能 preventDefault 阻止页面滚动
+    twj_viewer.addEventListener('touchmove', twj_onTouchMove, { passive: false });
+    twj_viewer.addEventListener('touchend', twj_onTouchEnd, { passive: true });
+    twj_viewer.addEventListener('touchcancel', twj_onTouchCancel, { passive: true });
+    window.addEventListener('resize', twj_onResize);
+    window.addEventListener('orientationchange', twj_onResize);
+    document.getElementById('twjResetBtn').addEventListener('click', twj_onReset);
+
+    var twj_hasTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    twj_hint.textContent = twj_hasTouch
+      ? '双指捏合缩放，双击放大 / 还原，放大后单指拖动'
+      : '双指缩放请用手机打开；电脑可在 DevTools 设备模式里模拟触摸';
+
+    twj_applyTransform(false);
+  }
+
+  twj_init();
+</script>
+</body>
+</html>

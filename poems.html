@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰
+  建立时间：2026-11-13
+  使用大模型：DeepSeek-V4.1-Flash
+  功能名称：诗词卡片页（并发读取 /api/poems 与 /api/authors，支持关键字搜索与按标题长度排序）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="从本地数据服务器读取诗词与作者并渲染成可搜索、可排序的卡片">
+  <title>诗词卡片 · 本地接口实践</title>
+  <style>
+    :root {
+      --twj_ink: #172033;
+      --twj_muted: #68738a;
+      --twj_paper: #f7f9fc;
+      --twj_card: #ffffff;
+      --twj_line: #e5eaf2;
+      --twj_primary: #4f46e5;
+      --twj_secondary: #06b6d4;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 40px 20px 60px;
+      color: var(--twj_ink);
+      background:
+        radial-gradient(circle at 8% 4%, rgba(129, 140, 248, 0.2), transparent 25rem),
+        radial-gradient(circle at 92% 17%, rgba(103, 232, 249, 0.18), transparent 24rem),
+        var(--twj_paper);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    .twj_page {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+    }
+    .twj_head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .twj_head h1 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      letter-spacing: 0.04em;
+    }
+    .twj_head p {
+      margin: 0;
+      color: var(--twj_muted);
+      font-size: 13.5px;
+    }
+    .twj_head code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(79, 70, 229, 0.08);
+      color: var(--twj_primary);
+      font-size: 12.5px;
+    }
+    .twj_back {
+      flex: none;
+      padding: 9px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--twj_primary), var(--twj_secondary));
+      font-size: 13.5px;
+      text-decoration: none;
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+      transition: transform 0.2s ease;
+    }
+    .twj_back:hover {
+      transform: translateY(-2px);
+    }
+    .twj_status {
+      margin-bottom: 16px;
+      padding: 10px 16px;
+      border: 1px solid var(--twj_line);
+      border-radius: 12px;
+      background: var(--twj_card);
+      color: var(--twj_muted);
+      font-size: 13px;
+    }
+    .twj_status.twj_ok {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+      color: #15803d;
+    }
+    .twj_status.twj_error {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    /* twj 工具条：搜索框 + 排序按钮 */
+    .twj_toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .twj_search {
+      flex: 1 1 240px;
+      min-width: 0;
+      padding: 11px 18px;
+      border: 1px solid var(--twj_line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--twj_ink);
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .twj_search:focus {
+      border-color: var(--twj_primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+    .twj_sort {
+      flex: none;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--twj_primary), var(--twj_secondary));
+      font-size: 13.5px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .twj_sort:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+    }
+    .twj_authors {
+      margin-bottom: 20px;
+      color: var(--twj_muted);
+      font-size: 13px;
+    }
+    .twj_authors b {
+      color: var(--twj_primary);
+      font-weight: 600;
+    }
+    .twj_grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 22px;
+    }
+    .twj_card {
+      overflow: hidden;
+      border: 1px solid var(--twj_line);
+      border-radius: 16px;
+      background: var(--twj_card);
+      box-shadow: 0 14px 34px rgba(31, 42, 68, 0.08);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .twj_card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 44px rgba(31, 42, 68, 0.14);
+    }
+    .twj_pic_box {
+      position: relative;
+      height: 160px;
+      background: linear-gradient(135deg, #e0e7ff, #cffafe);
+    }
+    .twj_pic {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .twj_card_body {
+      padding: 14px 16px 18px;
+    }
+    .twj_card_title {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: var(--twj_ink);
+    }
+    .twj_card_author {
+      margin: 0 0 8px;
+      color: var(--twj_primary);
+      font-size: 12.5px;
+    }
+    .twj_card_text {
+      margin: 0;
+      color: var(--twj_muted);
+      font-size: 13.5px;
+    }
+    .twj_empty {
+      grid-column: 1 / -1;
+      padding: 40px 20px;
+      border: 1px dashed var(--twj_line);
+      border-radius: 16px;
+      text-align: center;
+      color: var(--twj_muted);
+      background: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 24px 12px 44px;
+      }
+      .twj_head {
+        flex-direction: column;
+      }
+      .twj_head h1 {
+        font-size: 22px;
+      }
+      .twj_pic_box {
+        height: 200px;
+      }
+      .twj_sort {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="twj_page">
+    <header class="twj_head">
+      <div>
+        <h1>诗词卡片</h1>
+        <p>数据来自本地服务器接口 <code>/api/poems</code> 与 <code>/api/authors</code>，两个接口并发请求。</p>
+      </div>
+      <a class="twj_back" href="index.html">返回首页</a>
+    </header>
+
+    <div class="twj_status" id="twjStatus">正在读取接口数据…</div>
+
+    <div class="twj_toolbar">
+      <input class="twj_search" id="twjSearch" type="search" placeholder="输入标题或诗句关键字，自动筛选…" autocomplete="off">
+      <button class="twj_sort" id="twjSortBtn" type="button">按标题长度排序</button>
+    </div>
+
+    <div class="twj_authors" id="twjAuthors"></div>
+
+    <main class="twj_grid" id="twjGrid"></main>
+  </div>
+
+<script>
+  // 两个接口地址：若 server.js 里的 twj_port 改成 3005，这里要同步改
+  var twjApiPoems = 'http://localhost:3004/api/poems';
+  var twjApiAuthors = 'http://localhost:3004/api/authors';
+
+  // twj_allPoems：接口返回的原始诗词数据，搜索和排序都基于它，不重新发请求
+  var twj_allPoems = [];
+  // twj_sortMode：排序状态，none 表示按接口原顺序，asc / desc 表示标题长度升序 / 降序
+  var twj_sortMode = 'none';
+  // twj_authorsText：作者栏的固定文字，刷新卡片时拼上当前显示数量
+  var twj_authorsText = '';
+
+  // twj_showStatus：在页面顶部显示提示文字，twj_type 取 ok / error 控制颜色
+  function twj_showStatus(twjText, twjType) {
+    var twjBox = document.getElementById('twjStatus');
+    twjBox.textContent = twjText;
+    twjBox.className = 'twj_status' + (twjType ? ' twj_' + twjType : '');
+  }
+
+  // twj_createCard：根据一条数据创建卡片，结构为「上图下文」
+  function twj_createCard(twjItem) {
+    var twjCard = document.createElement('article');
+    twjCard.className = 'twj_card';
+
+    var twjPicBox = document.createElement('div');
+    twjPicBox.className = 'twj_pic_box';
+
+    var twjImg = document.createElement('img');
+    twjImg.className = 'twj_pic';
+    twjImg.src = twjItem.pic;
+    twjImg.alt = twjItem.title;
+    // 不发送 Referer，绕开图床的防盗链（否则本地打开页面时图片会被拒绝）
+    twjImg.referrerPolicy = 'no-referrer';
+    // 图片加载失败时隐藏，露出底部的渐变占位色，避免出现破图图标
+    twjImg.onerror = function () {
+      twjImg.style.display = 'none';
+    };
+    twjPicBox.appendChild(twjImg);
+
+    var twjBody = document.createElement('div');
+    twjBody.className = 'twj_card_body';
+
+    var twjTitle = document.createElement('h2');
+    twjTitle.className = 'twj_card_title';
+    twjTitle.textContent = twjItem.title;
+
+    var twjAuthor = document.createElement('p');
+    twjAuthor.className = 'twj_card_author';
+    twjAuthor.textContent = twjItem.author || '佚名';
+
+    var twjText = document.createElement('p');
+    twjText.className = 'twj_card_text';
+    twjText.textContent = twjItem.content;
+
+    twjBody.appendChild(twjTitle);
+    twjBody.appendChild(twjAuthor);
+    twjBody.appendChild(twjText);
+    twjCard.appendChild(twjPicBox);
+    twjCard.appendChild(twjBody);
+    return twjCard;
+  }
+
+  // twj_renderPoems：清空容器并渲染传入的诗词列表，列表为空时显示提示文字
+  function twj_renderPoems(twjList, twjEmptyText) {
+    var twjGrid = document.getElementById('twjGrid');
+    twjGrid.innerHTML = '';
+
+    if (!twjList || twjList.length === 0) {
+      var twjEmpty = document.createElement('div');
+      twjEmpty.className = 'twj_empty';
+      twjEmpty.textContent = twjEmptyText || '没有找到匹配的诗词，换个关键字试试。';
+      twjGrid.appendChild(twjEmpty);
+      return;
+    }
+
+    twjList.forEach(function (twjItem) {
+      twjGrid.appendChild(twj_createCard(twjItem));
+    });
+  }
+
+  // twj_getVisiblePoems：按搜索框关键字过滤（匹配标题或正文），并按标题长度排序
+  function twj_getVisiblePoems() {
+    var twjKeyword = document.getElementById('twjSearch').value.trim();
+    var twjList = twj_allPoems.filter(function (twjItem) {
+      if (!twjKeyword) {
+        return true;
+      }
+      return twjItem.title.indexOf(twjKeyword) !== -1 || twjItem.content.indexOf(twjKeyword) !== -1;
+    });
+
+    if (twj_sortMode !== 'none') {
+      twjList.sort(function (twjA, twjB) {
+        return twj_sortMode === 'asc' ? twjA.title.length - twjB.title.length : twjB.title.length - twjA.title.length;
+      });
+    }
+    return twjList;
+  }
+
+  // twj_refresh：按当前关键字与排序方向重新渲染卡片，并更新作者栏里的显示数量
+  function twj_refresh() {
+    var twjList = twj_getVisiblePoems();
+    twj_renderPoems(twjList, '没有找到匹配的诗词，换个关键字试试。');
+    document.getElementById('twjAuthors').innerHTML = twj_authorsText + ' ｜ 当前显示 <b>' + twjList.length + '</b> / ' + twj_allPoems.length + ' 首';
+  }
+
+  // twj_renderAuthors：把第二个接口返回的作者列表渲染到作者栏
+  function twj_renderAuthors(twjAuthors) {
+    var twjNames = twjAuthors.map(function (twjAuthor) {
+      return twjAuthor.name + '（' + twjAuthor.count + '）';
+    });
+    twj_authorsText = '诗人：<b>' + twjNames.length + '</b> 位 · ' + twjNames.join('、');
+  }
+
+  // twj_loadData：用 Promise.all 并发请求两个接口，成功渲染、失败提示先启动服务器
+  function twj_loadData() {
+    Promise.all([fetch(twjApiPoems), fetch(twjApiAuthors)])
+      .then(function (twjResList) {
+        return Promise.all(twjResList.map(function (twjRes) {
+          if (!twjRes.ok) {
+            throw new Error('接口返回状态码 ' + twjRes.status);
+          }
+          return twjRes.json();
+        }));
+      })
+      .then(function (twjData) {
+        var twjPoems = Array.isArray(twjData[0]) ? twjData[0] : twjData[0].poems;
+        twj_allPoems = twjPoems;
+        twj_renderAuthors(twjData[1]);
+        twj_refresh();
+        twj_showStatus('接口连接成功，共读取到 ' + twjPoems.length + ' 首诗词、' + twjData[1].length + ' 位诗人。', 'ok');
+      })
+      .catch(function (twjErr) {
+        twj_allPoems = [];
+        twj_authorsText = '';
+        document.getElementById('twjAuthors').textContent = '';
+        twj_renderPoems([], '数据没有取到，先启动服务器再刷新本页。');
+        twj_showStatus('读取失败：' + twjErr.message + '。请先在 db 文件夹执行 node server.js 启动服务器，再刷新本页。', 'error');
+      });
+  }
+
+  // twj_searchInput：搜索框输入事件，边输入边筛选
+  function twj_searchInput() {
+    twj_refresh();
+  }
+
+  // twj_sortClick：排序按钮点击事件，在标题长度升序 / 降序之间切换
+  function twj_sortClick() {
+    twj_sortMode = twj_sortMode === 'asc' ? 'desc' : 'asc';
+    document.getElementById('twjSortBtn').textContent = '按标题长度排序 ' + (twj_sortMode === 'asc' ? '↑' : '↓');
+    twj_refresh();
+  }
+
+  // 页面加载：绑定交互事件并请求两个接口
+  document.getElementById('twjSearch').addEventListener('input', twj_searchInput);
+  document.getElementById('twjSortBtn').addEventListener('click', twj_sortClick);
+  twj_loadData();
+</script>
+</body>
+</html>

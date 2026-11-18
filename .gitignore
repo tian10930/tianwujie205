@@ -10,3 +10,6 @@ Desktop.ini
 
 # Trae 工具生成的共享缓存目录，禁止提交
 .trae-html-share-packages/
+
+# npm 依赖目录，体积大且可由 npm install 还原
+node_modules/

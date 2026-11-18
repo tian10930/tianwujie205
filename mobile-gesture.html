@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰（学号 24002120205）
+  建立时间：2026-11-18
+  使用大模型：DeepSeek-V4.1-Flash
+  功能名称：手势卡片（左右滑动切换中华美食卡片，含阈值防误触、300ms 冷却、边界提示）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="用 touchstart / touchend 识别左右滑动，切换四道中华美食卡片">
+  <link rel="icon" href="data:,">
+  <title>手势卡片 · 左右滑动切换</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      min-height: 100vh;
+      padding: 22px 16px 40px;
+      color: #1d2433;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(129, 140, 248, 0.22), transparent 22rem),
+        radial-gradient(circle at 90% 12%, rgba(103, 232, 249, 0.2), transparent 20rem),
+        #f6f8fc;
+      font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      overflow-x: hidden;
+    }
+    .twj_head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .twj_head h1 {
+      font-size: 20px;
+      letter-spacing: 0.02em;
+    }
+    .twj_back {
+      flex: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      font-size: 12.5px;
+      text-decoration: none;
+    }
+    .twj_counter {
+      margin-bottom: 10px;
+      color: #5b6478;
+      font-size: 13px;
+      text-align: center;
+    }
+    .twj_counter b {
+      color: #4f46e5;
+      font-size: 15px;
+    }
+    /* twj_viewport：卡片可视区，touch-action: pan-y 表示纵向交给浏览器滚动，横向手势归自己 */
+    .twj_viewport {
+      overflow: hidden;
+      border-radius: 22px;
+      touch-action: pan-y;
+      box-shadow: 0 18px 40px rgba(29, 42, 68, 0.14);
+    }
+    .twj_track {
+      display: flex;
+      transition: transform 0.3s ease;
+      will-change: transform;
+    }
+    .twj_dish {
+      flex: 0 0 100%;
+      min-height: 330px;
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      color: #fff;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .twj_dish_emoji {
+      font-size: 62px;
+      line-height: 1;
+      margin-bottom: auto;
+    }
+    .twj_dish_name {
+      font-size: 24px;
+      margin: 18px 0 8px;
+      letter-spacing: 0.04em;
+    }
+    .twj_dish_desc {
+      font-size: 13.5px;
+      line-height: 1.7;
+      opacity: 0.92;
+    }
+    .twj_dish_tag {
+      align-self: flex-start;
+      margin-bottom: 14px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      font-size: 12px;
+    }
+    .twj_tip {
+      min-height: 22px;
+      margin: 14px 0 4px;
+      color: #6b7488;
+      font-size: 13px;
+      text-align: center;
+    }
+    .twj_tip.twj_warn {
+      color: #d97706;
+      font-weight: 600;
+    }
+    .twj_guide {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border: 1px solid #e4e9f2;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #5b6478;
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .twj_guide h2 {
+      margin-bottom: 6px;
+      color: #1d2433;
+      font-size: 14.5px;
+    }
+    .twj_guide code {
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: rgba(79, 70, 229, 0.09);
+      color: #4f46e5;
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+<body>
+  <header class="twj_head">
+    <h1>中华美食 · 手势卡片</h1>
+    <a class="twj_back" href="index.html">返回首页</a>
+  </header>
+
+  <p class="twj_counter">第 <b id="twjCurrent">1</b> / <b id="twjTotal">4</b> 张</p>
+
+  <div class="twj_viewport" id="twjViewport">
+    <div class="twj_track" id="twjTrack"></div>
+  </div>
+
+  <p class="twj_tip" id="twjTip">左右滑动切换菜品</p>
+
+  <section class="twj_guide">
+    <h2>手势规则</h2>
+    <p>横向位移超过 <code>40px</code> 才切换，防止短距离误触；切换后进入 <code>300ms</code> 冷却，快速连滑不会一次跳两张。</p>
+    <p>容器只接管横向手势（<code>touch-action: pan-y</code>），页面依然可以上下滚动。</p>
+  </section>
+
+<script>
+  // 四道菜的数据：名称、菜系、简介、表情与渐变配色
+  var twj_dishes = [
+    {
+      name: '北京烤鸭',
+      tag: '京菜 · 招牌',
+      desc: '果木炭火慢烤，皮酥肉嫩，片成薄片卷荷叶饼，甜面酱与葱丝一起入口。',
+      emoji: '🦆',
+      gradient: 'linear-gradient(145deg, #b45309, #f59e0b)'
+    },
+    {
+      name: '麻婆豆腐',
+      tag: '川菜 · 麻辣',
+      desc: '郫县豆瓣与花椒炝出红油，嫩豆腐吸满汤汁，麻、辣、烫、香、酥、嫩俱全。',
+      emoji: '🌶️',
+      gradient: 'linear-gradient(145deg, #b91c1c, #f97316)'
+    },
+    {
+      name: '白切鸡',
+      tag: '粤菜 · 本味',
+      desc: '清汤浸熟后冰水收紧鸡皮，蘸姜葱蓉，皮爽肉滑，吃的就是一个鲜。',
+      emoji: '🍗',
+      gradient: 'linear-gradient(145deg, #0f766e, #34d399)'
+    },
+    {
+      name: '兰州牛肉面',
+      tag: '西北 · 一清二白',
+      desc: '一清二白三红四绿五黄：清汤、白萝卜、红辣油、绿蒜苗、黄亮面条，现拉现煮。',
+      emoji: '🍜',
+      gradient: 'linear-gradient(145deg, #1e3a8a, #38bdf8)'
+    }
+  ];
+
+  // 横向位移达到该像素数才认为是有效滑动
+  var twj_threshold = 40;
+  // 切换冷却时间，单位毫秒，防止一次快速连滑跳两张
+  var twj_cooldown = 300;
+
+  var twj_index = 0;        // 当前卡片下标
+  var twj_startX = 0;       // 手指按下时的横坐标
+  var twj_startY = 0;       // 手指按下时的纵坐标
+  var twj_locked = false;   // 冷却锁：true 时忽略新的滑动
+  var twj_lockTimer = null; // 冷却计时器
+
+  // 根据四道菜的数据一次性生成卡片，后续切换只改位移，不重建 DOM
+  function twj_renderCards() {
+    var twj_track = document.getElementById('twjTrack');
+    twj_track.innerHTML = '';
+
+    twj_dishes.forEach(function (twj_dish, twj_i) {
+      var twj_card = document.createElement('article');
+      twj_card.className = 'twj_dish';
+      twj_card.style.background = twj_dish.gradient;
+      twj_card.setAttribute('data-twj-index', twj_i);
+
+      var twj_emoji = document.createElement('div');
+      twj_emoji.className = 'twj_dish_emoji';
+      twj_emoji.textContent = twj_dish.emoji;
+
+      var twj_tag = document.createElement('span');
+      twj_tag.className = 'twj_dish_tag';
+      twj_tag.textContent = twj_dish.tag;
+
+      var twj_name = document.createElement('h2');
+      twj_name.className = 'twj_dish_name';
+      twj_name.textContent = twj_dish.name;
+
+      var twj_desc = document.createElement('p');
+      twj_desc.className = 'twj_dish_desc';
+      twj_desc.textContent = twj_dish.desc;
+
+      twj_card.appendChild(twj_emoji);
+      twj_card.appendChild(twj_tag);
+      twj_card.appendChild(twj_name);
+      twj_card.appendChild(twj_desc);
+      twj_track.appendChild(twj_card);
+    });
+
+    document.getElementById('twjTotal').textContent = twj_dishes.length;
+  }
+
+  // 按当前下标平移轨道，transition 负责 0.3s 的切换动画
+  function twj_updateTrack() {
+    document.getElementById('twjTrack').style.transform = 'translateX(' + (-twj_index * 100) + '%)';
+    document.getElementById('twjCurrent').textContent = twj_index + 1;
+  }
+
+  // 更新底部提示文字，twj_isWarn 为 true 时显示橙色警示样式
+  function twj_showTip(twj_text, twj_isWarn) {
+    var twj_tip = document.getElementById('twjTip');
+    twj_tip.textContent = twj_text;
+    twj_tip.className = 'twj_tip' + (twj_isWarn ? ' twj_warn' : '');
+  }
+
+  // 手指按下：记录起点坐标，并忽略多指操作
+  function twj_onTouchStart(twj_event) {
+    if (twj_event.touches.length !== 1) {
+      return;
+    }
+    twj_startX = twj_event.touches[0].clientX;
+    twj_startY = twj_event.touches[0].clientY;
+  }
+
+  // 手指抬起：用 changedTouches 算横向位移，判断方向并切换卡片
+  function twj_onTouchEnd(twj_event) {
+    // 抬手时这根手指已从 touches 移除，必须用 changedTouches[0]
+    var twj_touch = twj_event.changedTouches[0];
+    var twj_dx = twj_touch.clientX - twj_startX;
+    var twj_dy = twj_touch.clientY - twj_startY;
+
+    // 纵向位移更大说明是上下滚动，交还给页面，不当作翻卡
+    if (Math.abs(twj_dy) > Math.abs(twj_dx)) {
+      return;
+    }
+    // 没超过阈值视为误触或点击，不切换
+    if (Math.abs(twj_dx) < twj_threshold) {
+      twj_showTip('滑动距离太短（需超过 ' + twj_threshold + 'px）', false);
+      return;
+    }
+    // 冷却期内忽略，避免一次快速连滑直接跳两张
+    if (twj_locked) {
+      return;
+    }
+
+    if (twj_dx < 0) {
+      twj_goNext();
+    } else {
+      twj_goPrev();
+    }
+  }
+
+  // 切到下一张，已是最后一张时给出边界提示
+  function twj_goNext() {
+    if (twj_index >= twj_dishes.length - 1) {
+      twj_showTip('已经是最后一张了', true);
+      return;
+    }
+    twj_index = twj_index + 1;
+    twj_updateTrack();
+    twj_startCooldown();
+    twj_showTip('← 下一道：' + twj_dishes[twj_index].name, false);
+  }
+
+  // 切到上一张，已是第一张时给出边界提示
+  function twj_goPrev() {
+    if (twj_index <= 0) {
+      twj_showTip('已经是第一张了', true);
+      return;
+    }
+    twj_index = twj_index - 1;
+    twj_updateTrack();
+    twj_startCooldown();
+    twj_showTip('上一道：' + twj_dishes[twj_index].name + ' →', false);
+  }
+
+  // 开启 300ms 冷却锁，时间到后自动解锁
+  function twj_startCooldown() {
+    twj_locked = true;
+    clearTimeout(twj_lockTimer);
+    twj_lockTimer = setTimeout(function () {
+      twj_locked = false;
+    }, twj_cooldown);
+  }
+
+  // 初始化：渲染卡片并绑定触摸事件
+  function twj_init() {
+    twj_renderCards();
+    twj_updateTrack();
+
+    var twj_viewport = document.getElementById('twjViewport');
+    // passive: true 不阻塞浏览器滚动，提升手机上的顺滑度
+    twj_viewport.addEventListener('touchstart', twj_onTouchStart, { passive: true });
+    twj_viewport.addEventListener('touchend', twj_onTouchEnd, { passive: true });
+  }
+
+  twj_init();
+</script>
+</body>
+</html>
