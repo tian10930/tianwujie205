@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰
+  建立时间：2026-11-27
+  使用大模型：GLM-5.3-Flash
+  功能名称：商业评论情感分析页（调用 /api/ai/analyze 输出结构化 JSON）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>评论分析 - 商业评论情感分析系统</title>
+  <link rel="stylesheet" href="css/twj_style.css">
+</head>
+<body>
+  <main class="twj_page">
+    <header class="twj_header">
+      <a href="index.html" class="twj_back">← 首页</a>
+      <h1>评论情感分析</h1>
+    </header>
+
+    <section class="twj_input_area">
+      <label for="twj_reviewInput">输入商业评论（2000 字以内）：</label>
+      <textarea id="twj_reviewInput" rows="5"
+        placeholder="例如：这家店的酸奶特别好喝，包装也很结实，就是快递慢了两天。"></textarea>
+      <div class="twj_btns">
+        <button id="twj_analyzeBtn" class="twj_btn">开始分析</button>
+        <button id="twj_clearBtn" class="twj_btn twj_btn_ghost">清空</button>
+      </div>
+      <p id="twj_errorTip" class="twj_error" hidden></p>
+    </section>
+
+    <section id="twj_loading" class="twj_loading" hidden>
+      <span class="twj_spinner"></span> AI 正在分析，请稍候…
+    </section>
+
+    <section id="twj_result" class="twj_result" hidden>
+      <div class="twj_result_head">
+        <span id="twj_sentimentBadge" class="twj_badge"></span>
+        <span id="twj_confidence" class="twj_confidence"></span>
+        <span id="twj_reviewFlag" class="twj_flag" hidden>需人工复核</span>
+      </div>
+      <div class="twj_bar_wrap">
+        <div id="twj_bar" class="twj_bar"></div>
+      </div>
+      <p class="twj_summary" id="twj_summary"></p>
+      <p class="twj_label">评论维度：</p>
+      <div id="twj_aspects" class="twj_tags"></div>
+      <p class="twj_label">识别实体：</p>
+      <div id="twj_entities" class="twj_tags"></div>
+      <details class="twj_raw">
+        <summary>查看原始 JSON</summary>
+        <pre id="twj_rawJson"></pre>
+      </details>
+    </section>
+  </main>
+
+  <script src="js/twj_analyze.js"></script>
+</body>
+</html>

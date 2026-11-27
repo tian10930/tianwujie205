@@ -13,3 +13,6 @@ Desktop.ini
 
 # npm 依赖目录，体积大且可由 npm install 还原
 node_modules/
+
+# 环境配置含 API 密钥，仅本地保留（各子项目已有同名忽略，此处兜底）
+.env

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰
+  建立时间：2026-11-27
+  使用大模型：GLM-5.3-Flash
+  功能名称：历史分析记录页（读取 MySQL 中的评论与结构化结果）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史记录 - 商业评论情感分析系统</title>
+  <link rel="stylesheet" href="css/twj_style.css">
+</head>
+<body>
+  <main class="twj_page">
+    <header class="twj_header">
+      <a href="index.html" class="twj_back">← 首页</a>
+      <h1>历史分析记录</h1>
+      <button id="twj_refreshBtn" class="twj_btn twj_btn_small">刷新</button>
+    </header>
+
+    <section id="twj_stats" class="twj_stats" hidden>
+      <span>正面：<b id="twj_statPos">0</b></span>
+      <span>中性：<b id="twj_statNeu">0</b></span>
+      <span>负面：<b id="twj_statNeg">0</b></span>
+      <span>待复核：<b id="twj_statReview">0</b></span>
+    </section>
+
+    <section id="twj_recordList" class="twj_records"></section>
+    <p id="twj_emptyTip" class="twj_empty" hidden>暂无记录，去<a href="analyze.html">分析一条评论</a>吧。</p>
+  </main>
+
+  <script src="js/twj_records.js"></script>
+</body>
+</html>

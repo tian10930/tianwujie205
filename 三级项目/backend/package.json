@@ -1,0 +1,16 @@
+{
+  "name": "twj-llm-harness-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "三级项目：商业评论情感分类（Harness Engineering），Express 中间层代理大模型 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0"
+  }
+}

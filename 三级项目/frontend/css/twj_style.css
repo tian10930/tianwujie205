@@ -1,0 +1,180 @@
+/* 全站样式：商业评论情感分析系统（原生 CSS，类名均以 twj_ 开头） */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #f2f5f9;
+  color: #2c3e50;
+  line-height: 1.6;
+}
+
+/* 首页布局 */
+.twj_home {
+  max-width: 760px;
+  margin: 10vh auto 0;
+  padding: 0 16px;
+  text-align: center;
+}
+.twj_title { font-size: 30px; margin-bottom: 8px; }
+.twj_subtitle { color: #7f8c9b; margin-bottom: 36px; }
+.twj_nav { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.twj_card {
+  flex: 1 1 220px;
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  padding: 24px 18px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow .2s, transform .2s;
+}
+.twj_card:hover { box-shadow: 0 6px 18px rgba(52,120,246,.15); transform: translateY(-3px); }
+.twj_card h2 { font-size: 19px; color: #3478f6; margin-bottom: 8px; }
+.twj_card p { font-size: 14px; color: #7f8c9b; }
+
+/* 通用页面布局 */
+.twj_page { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+.twj_header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.twj_header h1 { font-size: 22px; flex: 1; }
+.twj_back { color: #3478f6; text-decoration: none; font-size: 14px; }
+
+/* 输入区 */
+.twj_input_area {
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+.twj_input_area label { display: block; font-size: 14px; margin-bottom: 8px; }
+#twj_reviewInput {
+  width: 100%;
+  border: 1px solid #d3dce6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 15px;
+  resize: vertical;
+  font-family: inherit;
+}
+#twj_reviewInput:focus { outline: 2px solid #3478f6; border-color: transparent; }
+.twj_btns { margin-top: 12px; display: flex; gap: 10px; }
+.twj_btn {
+  background: #3478f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.twj_btn:disabled { background: #a9c4f7; cursor: not-allowed; }
+.twj_btn_ghost { background: #fff; color: #3478f6; border: 1px solid #3478f6; }
+.twj_btn_small { padding: 6px 14px; font-size: 13px; }
+
+/* 状态与提示 */
+.twj_error { color: #e0245e; margin-top: 10px; font-size: 14px; }
+.twj_empty { color: #7f8c9b; text-align: center; margin-top: 32px; }
+.twj_loading {
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  padding: 22px;
+  text-align: center;
+  color: #5a6b7d;
+}
+.twj_spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 3px solid #d6e4ff;
+  border-top-color: #3478f6;
+  border-radius: 50%;
+  animation: twj_spin .8s linear infinite;
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+@keyframes twj_spin { to { transform: rotate(360deg); } }
+
+/* 结果卡片 */
+.twj_result {
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  padding: 20px;
+}
+.twj_result_head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.twj_badge { color: #fff; border-radius: 20px; padding: 4px 16px; font-size: 14px; font-weight: bold; }
+.twj_badge.twj_positive { background: #22a35d; }
+.twj_badge.twj_neutral { background: #8b95a1; }
+.twj_badge.twj_negative { background: #e0245e; }
+.twj_confidence { color: #5a6b7d; font-size: 14px; }
+.twj_flag { color: #b45309; background: #fef3c7; border-radius: 6px; padding: 2px 10px; font-size: 13px; }
+.twj_bar_wrap { background: #edf1f6; border-radius: 8px; height: 10px; margin: 14px 0; overflow: hidden; }
+.twj_bar { height: 100%; background: #3478f6; border-radius: 8px; transition: width .4s; }
+.twj_summary { margin-bottom: 12px; font-size: 15px; }
+.twj_label { font-size: 13px; color: #7f8c9b; margin: 8px 0 6px; }
+.twj_tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.twj_tags span {
+  background: #eef4ff;
+  color: #3478f6;
+  border-radius: 6px;
+  padding: 3px 12px;
+  font-size: 13px;
+}
+.twj_tags span.twj_entity { background: #f0faf0; color: #22a35d; }
+.twj_tags span.twj_none { background: #f3f5f7; color: #a0aebd; }
+.twj_raw { margin-top: 14px; }
+.twj_raw summary { cursor: pointer; color: #3478f6; font-size: 14px; }
+.twj_raw pre {
+  background: #1f2933;
+  color: #d7e2ec;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+/* 历史记录 */
+.twj_stats {
+  display: flex;
+  gap: 20px;
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+.twj_stats b { color: #3478f6; }
+.twj_record {
+  background: #fff;
+  border: 1px solid #e3eaf2;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.twj_record_top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.twj_record_content { font-size: 15px; margin-bottom: 8px; }
+.twj_record_meta { font-size: 13px; color: #7f8c9b; margin-bottom: 8px; }
+.twj_record_del {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #e0245e;
+  color: #e0245e;
+  border-radius: 6px;
+  padding: 3px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.twj_record_del:hover { background: #fdeef2; }
+
+/* 移动端适配 */
+@media (max-width: 560px) {
+  .twj_home { margin-top: 6vh; }
+  .twj_title { font-size: 24px; }
+  .twj_header h1 { font-size: 18px; }
+  .twj_btns { flex-direction: column; }
+  .twj_stats { gap: 12px; }
+}
