@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+  作者：田武杰
+  建立时间：2026-11-27
+  使用大模型：GLM-5.3-Flash
+  功能名称：历史分析记录页（直连 Supabase REST，匿名只读）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史记录 - 商业评论情感分析系统</title>
+  <link rel="stylesheet" href="css/twj_style.css">
+</head>
+<body>
+  <main class="twj_page">
+    <header class="twj_header">
+      <a href="index.html" class="twj_back">← 首页</a>
+      <h1>历史分析记录</h1>
+      <button id="twj_refreshBtn" class="twj_btn twj_btn_small">刷新</button>
+    </header>
+
+    <section id="twj_stats" class="twj_stats" hidden>
+      <span>正面：<b id="twj_statPos">0</b></span>
+      <span>中性：<b id="twj_statNeu">0</b></span>
+      <span>负面：<b id="twj_statNeg">0</b></span>
+      <span>待复核：<b id="twj_statReview">0</b></span>
+    </section>
+
+    <section class="twj_filters">
+      <button class="twj_btn twj_btn_small twj_filter twj_active" data-sentiment="all">全部</button>
+      <button class="twj_btn twj_btn_small twj_filter" data-sentiment="positive">正面</button>
+      <button class="twj_btn twj_btn_small twj_filter" data-sentiment="neutral">中性</button>
+      <button class="twj_btn twj_btn_small twj_filter" data-sentiment="negative">负面</button>
+    </section>
+
+    <section id="twj_loading" class="twj_loading" hidden>
+      <span class="twj_spinner"></span> 正在从 Supabase 加载记录…
+    </section>
+
+    <section id="twj_recordList" class="twj_records"></section>
+
+    <p id="twj_emptyTip" class="twj_empty" hidden>暂无记录，请先执行 supabase/twj_init.sql 并检查 twj_config.js 配置。</p>
+    <p id="twj_errorTip" class="twj_error" hidden></p>
+  </main>
+
+  <script src="js/twj_config.js"></script>
+  <script src="js/twj_records.js"></script>
+</body>
+</html>
